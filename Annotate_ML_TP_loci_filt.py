@@ -1,4 +1,4 @@
-import annotate_input_finemapped_fuma_filt as annotate
+import annotate_finemapped_fuma_filt as annotate
 import os
 import sys
 
@@ -14,4 +14,6 @@ finemap_loci = os.listdir(finemap_output)
 for f in finemap_loci:
     if 'log_sss' in f:
         log_path = os.path.join(finemap_output, f)
-        annotate.main(log_path)
+        posteriors = annotate.parse_finemap_logs(log_path)
+        if max(posteriors) == posteriors[0]:
+            annotate.main(log_path)
