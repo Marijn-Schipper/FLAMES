@@ -1,0 +1,1 @@
+This respository contains all the code needed for running the post-GWAS analysis tool FLAMES
