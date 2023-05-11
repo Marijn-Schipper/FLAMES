@@ -410,10 +410,12 @@ def timer(start_time, process_name):
     print(f'time elapsed for {process_name}: {timestamp_f}')
     return start_time
 
-def main(input_log_path):
+def main(input_log_path, genome_build):
     #inputs:
     #annotations basedir
     #path to log file
+    if genome_build == 'hg19':
+        genome_build = 'hg37'
 
     start_time = time.perf_counter()
 
@@ -542,5 +544,5 @@ def main(input_log_path):
 
 
 if __name__ == "__main__":
-    main(argv[1])
+    main(argv[1], argv[2])
     
