@@ -133,8 +133,15 @@ def get_TSS_distances(creds, genes_in_locus, build):
     genes_in_locus['weighted_distance'] = weighted_distances
     return(genes_in_locus)
 
+"""Create tissue type scaling for eQTL based on MAGMA relevance"""
+def create_relevance_dict(magma_scores):
+    magma_scores['score'] = magma_scores['P'].rank(ascending=False) / len(magma_scores['P'])
+    magma_scores['score'] = magma_scores.apply(lambda row: row['score'] * 0.5 if row['p'] > 0.05 else row['score'] * 2 if row['p'] <= threshold else row['score'], axis=1)
+    magma_scores_dict = dict(zip(magma_scores['tissue'], magma_scores['score']))
+    return magma_scores
+
 """"For each variant in credible set, get the finemapped GTEx eqtls and score each gene in locus"""
-def get_GTEX_eQTLs(creds, genes, finemapped_gtex, build):
+def get_GTEX_eQTLs(creds, genes, finemapped_gtex, build, magma_scores=False):
     #prep data for input build
     if build.upper() == 'HG38':
         creds['eqtl_id'] = creds.apply(lambda row: f"chr{row['chr']}_{row['pos']}_{row['a1']}_{row['a2']}_b38", axis=1)
@@ -144,9 +151,13 @@ def get_GTEX_eQTLs(creds, genes, finemapped_gtex, build):
         creds['eqtl_id'] = creds.apply(lambda row: f"{row['chr']}_{row['pos']}_{row['a1']}_{row['a2']}_b37", axis=1)
         creds['eqtl_id2'] = creds.apply(lambda row: f"{row['chr']}_{row['pos']}_{row['a2']}_{row['a1']}_b37", axis=1)
         header = 'eQTL_hg37'
+        print('Calculate MAGMA based prio scores per tissue')
+        magma_scores = pd.read_csv(magma_scores, delim_whitespace=True, engine='pyarrow', comment='#')
     #GTEX get CLPP
     CLPP_sum = []
     CLPP_max = []
+    tissue_specific_CLPP_sum = []
+    tissue_specific_CLPP_max = []
     print('Get GTEx CLPP for each gene')
     with tqdm(total=genes.shape[0]) as pbar:
         for index, row in genes.iterrows():
@@ -164,9 +175,19 @@ def get_GTEX_eQTLs(creds, genes, finemapped_gtex, build):
                 sumval = sum(list(overlap['Probability'] * overlap['prob1']))
                 maxval = max(list(overlap['Probability'] * overlap['prob1']))
             CLPP_sum.append(sumval)
-            CLPP_max.append(maxval)  
+            CLPP_max.append(maxval)
+            if type(magma_scores) is dict and overlap.shape[0] > 0:
+                overlap['scores'] = overlap['TISSUE'].map(magma_scores)
+                overlap['Probability'] = overlap['Probability'] * overlap['scores']
+                sumval = sum(list(overlap['Probability'] * overlap['prob1']))
+                maxval = max(list(overlap['Probability'] * overlap['prob1']))
+                tissue_specific_CLPP_sum.append(sumval)
+                tissue_specific_CLPP_max.append(maxval)  
     genes['CLPP_GTEX_eQTL_sum'] = CLPP_sum
     genes['CLPP_GTEX_eQTL_max'] = CLPP_max
+    if type(magma_scores) is dict:
+        genes['CLPP_GTEX_tissue_weighted_eQTL_sum'] = tissue_specific_CLPP_sum
+        genes['CLPP_GTEX_tissue_weighted_eQTL_max'] = tissue_specific_CLPP_max
     return genes
 
 """"For each variant in credible set, get the finemapped eQTLgen eqtls and score each gene in locus"""
@@ -408,49 +429,16 @@ def annotate_credset(genes,creds, build, Ann_path, trainset=False):
     genes = get_RoadmapEpi(os.path.join(Ann_path, 'RoadmapEpi'), genes, creds, build)
     return genes
 
-""""For each variant in credible set, get the finemapped GTEx eqtls and score each gene in locus"""
-def get_MAGMA_GTEX_eQTLs(creds, genes, finemapped_gtex, build, magma_scores):
-    #prep data for input build
-    if build.upper() == 'HG38':
-        creds['eqtl_id'] = creds.apply(lambda row: f"chr{row['chr']}_{row['pos']}_{row['a1']}_{row['a2']}_b38", axis=1)
-        creds['eqtl_id2'] = creds.apply(lambda row: f"chr{row['chr']}_{row['pos']}_{row['a2']}_{row['a1']}_b38", axis=1)
-        header = 'eQTL'
-    else:
-        creds['eqtl_id'] = creds.apply(lambda row: f"{row['chr']}_{row['pos']}_{row['a1']}_{row['a2']}_b37", axis=1)
-        creds['eqtl_id2'] = creds.apply(lambda row: f"{row['chr']}_{row['pos']}_{row['a2']}_{row['a1']}_b37", axis=1)
-        header = 'eQTL_hg37'
-    #GTEX get CLPP
-    CLPP_sum = []
-    CLPP_max = []
-    print('Get GTEx CLPP for each gene')
-    with tqdm(total=genes.shape[0]) as pbar:
-        for index, row in genes.iterrows():
-            pbar.update(1)
-            maxval, sumval = 0,0
-            genepath = os.path.join(finemapped_gtex, row['ensg'].split('.')[0] + '.txt')
-            if not os.path.isfile(genepath):
-                CLPP_sum.append(sumval)
-                CLPP_max.append(maxval)
-                continue
-            eqtls = pd.read_csv(os.path.join(genepath), sep='\t',engine='pyarrow')
-            overlap = pd.merge(creds, eqtls, left_on='eqtl_id', right_on=header, how='inner')
-            overlap = pd.concat([overlap, pd.merge(creds, eqtls, left_on='eqtl_id2', right_on=header, how='inner')])
-            if overlap.shape[0] > 0:
-                sumval = sum(list(overlap['Probability'] * overlap['prob1']))
-                maxval = max(list(overlap['Probability'] * overlap['prob1']))
-            CLPP_sum.append(sumval)
-            CLPP_max.append(maxval)  
-    genes['CLPP_GTEX_eQTL_sum'] = CLPP_sum
-    genes['CLPP_GTEX_eQTL_max'] = CLPP_max
-    return genes
 
-def POPS_MAGMA_annotation(genes, magma, PoPS, MAGMA_GTEx_outpath):
+def POPS_MAGMA_annotation(genes, magma, PoPS):
     print('Get MAGMA gene Z-scores')
-    magma = pd.read_csv(MAGMA_GTEx_outpath, sep='\t', engine='pyarrow')
     magma = magma[['GENE', 'ZSTAT']]
     genes = pd.merge(genes, magma, left_on='ensg', right_on='GENE', how='left')
-
-
+    genes = genes.drop(columns=['GENE'])
+    genes = genes.rename(columns={'ZSTAT': 'MAGMA_Z'}).fillna(0)
+    print('Get PoPS scores')
+    PoPS = PoPS[['ENSGID', 'PoPS_Score']]
+    genes = pd.merge(genes, PoPS, left_on='ensg', right_on='ENSGID', how='left')
     return genes
 
 def check_dist_to_causal(creds, causal):
@@ -468,15 +456,17 @@ def main(Annotation_dir, build, pops_out, MAGMA_genes_out, trainset = False):
     Ann_path = os.path.normpath(Annotation_dir)
     GenomicRiskLoci = pd.read_csv(os.path.join('/home/schipper/ML/annotation_test/GenomicRiskLoci.txt'), sep='\t', engine='pyarrow')
     PoPS = pd.read_csv(pops_out)
-    magma = pd.read_csv(MAGMA_genes_out)
+    magma = pd.read_csv(MAGMA_genes_out+ 'genes.out', sep='\t', engine='pyarrow')
     creds = pd.read_csv('/home/schipper/ML/annotation_test/locus_1753.cred1', sep=' ', comment='#')
     creds[['chr', 'pos', 'alleles']] = creds['cred1'].str.split(':', expand=True)
     creds[['chr', 'pos']] = creds[['chr', 'pos']].astype(np.int32)
     creds[['a1', 'a2']] = creds['alleles'].str.split('_', expand=True)
     genes = get_genes_in_locus(1753, '/home/schipper/ML/annotation_test/genes.txt', GenomicRiskLoci)
     genes = annotate_credset(genes, creds, build, Ann_path)
+    genes = POPS_MAGMA_annotation(genes, magma, PoPS)
+
     print(check_TP_genes(genes, '/home/schipper/ML/annotation_test/geneslist.txt'))
     return
 
 if __name__ == "__main__":
-    main(argv[1], 'hg19')
+    main(argv[1], 'hg19' , '/home/schipper/ML/annotation_test/PoPS_out.preds', '/home/schipper/ML/annotation_test/magma')
