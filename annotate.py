@@ -49,13 +49,6 @@ def runtime(func):
     return wrapper
 
 """Annotate a credible set based on variant position within annotation range"""	
-# def create_positional_mapping_matrix(df1, df2, colnames=['start', 'end'], colnames2=['pos'], chr=False):
-#     if not chr == False:
-#         if chr == 'X':
-#             chr = 23
-#         df1['chr'] = df1[df1['chr'] == chr]
-#     matches = df1.apply(lambda row: [check_range(row[colnames[0]], row[colnames[1]], loc) for loc in df2[colnames2[0]]], axis=1, result_type='expand')
-#     return matches
 def create_positional_mapping_matrix(df1, df2, colnames=['start', 'end'], colnames2=['pos'], chr=False):
     if not chr == False:
         if chr == 'X':
