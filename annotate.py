@@ -518,7 +518,7 @@ def check_dist_to_causal(genes, trainset, dist=500000):
 
 
 @runtime
-def main(credset_dir, Annotation_dir, build, pops_out, MAGMA_outdir, outdir, loci, genes,  TP = False, filter=False , processors=1):
+def main(credset_dir, Annotation_dir, build, pops_out, MAGMA_outdir, outdir, loci, genes,  TP = False, filter=False , processors=False):
     #Path for annotation files
     Ann_path = os.path.normpath(Annotation_dir)
 
@@ -538,7 +538,7 @@ def main(credset_dir, Annotation_dir, build, pops_out, MAGMA_outdir, outdir, loc
     else:
         lo = False
     
-    #Load credset file locations
+    #Load credset file locations and create arguments for multiprocessing
     infiles = []
     if os.path.isdir(credset_dir):
         for file in os.listdir(credset_dir):
@@ -551,31 +551,18 @@ def main(credset_dir, Annotation_dir, build, pops_out, MAGMA_outdir, outdir, loc
                 splitline = l.split('\t')
                 infiles.append(((splitline[0], splitline[1].strip()),build, GenomicRiskLoci, Ann_path, outdir, lo, magma, PoPS, genes, magma_scores, TP))
                 print(infiles)
-    pool = mp.Pool()
+    if processors:
+        pool = mp.Pool(processes=processors)
+    else:
+        pool = mp.Pool()
 
     # apply the function to each file in parallel, passing additional arguments
-    pool.starmap(full_annotation_of_credset, infiles)#, args=(build, GenomicRiskLoci, Ann_path, lo, magma, PoPS, genes, magma_scores, TP))
+    pool.starmap(full_annotation_of_credset, infiles)
 
     # wait for the worker processes to complete
     pool.close()
     pool.join()
-    # full_annotation_of_credset('/home/schipper/ML/annotation_test/locus_1753.cred1', build, 1753, GenomicRiskLoci, Ann_path, lo, magma, PoPS, genes, magma_scores=False, trainset='/home/schipper/ML/annotation_test/geneslist.txt')
-    # creds = pd.read_csv('/home/schipper/ML/annotation_test/locus_1753.cred1', sep=' ', comment='#')
-    # creds[['chr', 'pos', 'alleles']] = creds['cred1'].str.split(':', expand=True)
-    # creds[['chr', 'pos']] = creds[['chr', 'pos']].astype(np.int32)
-    # creds[['a1', 'a2']] = creds['alleles'].str.split('_', expand=True)
-    
-    # # liftover variants if build is GRCH38
-    
-    # if build == 'GRCH38':
-    #     creds = liftover_df(lo, creds, ['chr', 'pos'], ['pos_37'])
-
-    # # get genes in locus
-    # genes = get_genes_in_locus(1753, genes, GenomicRiskLoci)
-    # genes = Genes_in_locus_bp_based(1753, GenomicRiskLoci, os.path.join(Ann_path , '/ENSG/ENSG.v102.genes.txt'))
-    # genes = annotate_credset(genes, creds, build, Ann_path, magma=magma_scores)
-    # genes = POPS_MAGMA_annotation(genes, magma, PoPS)
     return
 
 if __name__ == "__main__":
-    main(argv[1], argv[2] , '/home/schipper/ML/annotation_test/PoPS_out.preds', '/home/schipper/ML/annotation_test/')
+    main(argv[1:])
