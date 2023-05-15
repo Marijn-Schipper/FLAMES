@@ -1,4 +1,4 @@
-import annotate_finemapped_fuma_filt as annotate
+import annotate as annotate
 import os
 import sys
 import argparse
@@ -23,15 +23,24 @@ def functional_annotation(args):
     parser.add_argument('-o','--outdir', help='Output directory', required=True)
     parser.add_argument('-l','--GenomicRiskLoci', help='Path to the file that describes the boundaries of the locus that belongs to each inputted credible set', required=True)
     parser.add_argument('-g','--genes', help='Path to the file that describes the genes that belong to each locus', required=True)
-    parser.add_argument('-tp', 'true_positives', help='Path to the file that describes the true positive genes in each locus')
+    parser.add_argument('-a','--annotation_dir', help='Directory containing the annotation files', required=True)
+    parser.add_argument('-b','--build', help='Genome build', default='GRCh37')
+    parser.add_argument('-p','--pops', help='PoPS preds outputfile of correspondig GWAS', required=True)
+    parser.add_argument('-m', '--magma_out', help='Path to the file that describes the MAGMA output', required=True)
+    parser.add_argument('-tp', '--true_positives', help='Path to the file that describes the true positive genes in each locus')
     parser.add_argument('-id', '--indexfile', help='File containing the locus no and its corresponing credible set file path')
     parser.add_argument('-f', '--filter', help='Filter the credible sets to only include those with a posterior probability of 0.95 or greater', action='store_true')
-    
-    args = parser.parse_args()
+    args = parser.parse_args(args)
     # At least one of the arguments is required
     if not (args.indexfile or args.credsets_dir):
         parser.error('At least one of --credsets_dir or --indexfile is required.')
-    annotate.main(args.credsets_dir, args.outdir, args.GenomicRiskLoci, args.genes, args.true_positives, args.indexfile, args.filter)
+    elif args.indexfile and args.credsets_dir:
+        parser.error('Only one of --credsets_dir or --indexfile is allowed.')
+    elif args.indexfile:
+        if os.path.isfile(args.indexfile) == False:
+            parser.error('The indexfile does not exist or is not a file.')
+        args.credsets_dir = args.indexfile
+    annotate.main(args.credsets_dir, args.annotation_dir, args.build, args.pops, args.magma_out, args.outdir, args.GenomicRiskLoci, args.genes, args.true_positives, args.indexfile, args.filter)
     return
 
 def MAGMA(args):
@@ -48,6 +57,7 @@ def main():
         sys.exit(1)
     command = sys.argv[1]
     args = sys.argv[2:]
+    print(args)
     if command == 'annotate':
         functional_annotation(args)
     elif command == 'MAGMA':
