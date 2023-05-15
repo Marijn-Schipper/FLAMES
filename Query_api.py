@@ -12,8 +12,9 @@ def query_VEP(chr, pos, a1, a2, build):
     headers = { "Content-Type" : "application/json", "Accept" : "application/json"}
     r = requests.get(server+ext, headers=headers)
     if not r.ok:
-        r.raise_for_status()
-        sys.exit()
+        # r.raise_for_status()
+        print(f'ERROR in querying {chr}:{pos}:{pos}/{a1}/{a2} in VEP')
+        return [{'transcript_consequences':[{'impact':'MODIFIER'}]}]
     decoded = r.json()
     return decoded
 
