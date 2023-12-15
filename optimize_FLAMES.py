@@ -4,7 +4,6 @@ from sys import argv
 import pickle as pk
 import os
 import train_FLAMES as tf
-import tqdm
 import random
 from sklearn.utils.parallel import delayed
 import xgboost as xgb
@@ -27,6 +26,7 @@ def Flames_scoring(df, pops_combi):
         pops_combi
     ) * df["rel_XGB_score"]
     max_in_loc = float(max(df["Combined_score"]))
+    df["raw_FLAMES_score"] = df["Combined_score"]
     if len(df) == 1:
         df["FLAMES_score"] = df["XGB_score"]
     else:
@@ -51,35 +51,31 @@ def optimize_params(
     results = df.copy()
     f1_best = 0
     fscores = {}
-    with tqdm.tqdm(total=iterations) as pbar:
-        for i in range(iterations):
-            PoPS_combination = np.linspace(0, 1, iterations)[i]
-            pbar.update(1)
-            df = results.groupby("locus").apply(
-                Flames_scoring,
-                PoPS_combination,
-            )
-            predictions = sum(df["FLAMES_causal"])
-            if predictions == 0:
-                continue
-            causal = sum(df["TP"])
-            correct = sum(df["TP"] & df["FLAMES_causal"])
-            df["correct"] = df["TP"] * df["FLAMES_causal"]
-            df["closest_gene_correct"] = df["TP"] & df["dist_pred"] == 1
-            precision_closest_gene = sum(df["closest_gene_correct"]) / sum(
-                df["dist_pred"]
-            )
-            precision = correct / predictions
-            recall = correct / causal
-            if recall > 0:
-                f1 = 2 * (precision * recall) / (precision + recall)
-                if f1 > f1_best:
-                    f1_best = f1
-                    best_params = PoPS_combination
-            else:
-                f1 = 0
-            # correct for simple closest gene prediction model as minimal baseline performance so that splits with only closest genes don't get overweighted
-            f1_corrected = f1_best / precision_closest_gene
+    for i in range(iterations):
+        PoPS_combination = np.linspace(0, 1, iterations)[i]
+        df = results.groupby("locus").apply(
+            Flames_scoring,
+            PoPS_combination,
+        )
+        predictions = sum(df["FLAMES_causal"])
+        if predictions == 0:
+            continue
+        causal = sum(df["TP"])
+        correct = sum(df["TP"] & df["FLAMES_causal"])
+        df["correct"] = df["TP"] * df["FLAMES_causal"]
+        df["closest_gene_correct"] = df["TP"] & df["dist_pred"] == 1
+        precision_closest_gene = sum(df["closest_gene_correct"]) / sum(df["dist_pred"])
+        precision = correct / predictions
+        recall = correct / causal
+        if recall > 0:
+            f1 = 2 * (precision * recall) / (precision + recall)
+            if f1 > f1_best:
+                f1_best = f1
+                best_params = PoPS_combination
+        else:
+            f1 = 0
+        # correct for simple closest gene prediction model as minimal baseline performance so that splits with only closest genes don't get overweighted
+        f1_corrected = f1_best / precision_closest_gene
     return best_params, f1_corrected
 
 
