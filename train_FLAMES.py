@@ -4,10 +4,8 @@ import random
 import numpy as np
 from sklearn.model_selection import RandomizedSearchCV
 from sklearn.model_selection import GroupShuffleSplit
-import matplotlib.pyplot as plt
 import pickle as pk
 import sys
-import shap
 import annotate as ann
 import xgboost as xgb
 
@@ -178,26 +176,6 @@ def empty_training_loci(df):
     return False
 
 
-def plot_feature_importances(modeldir, model, features):
-    feature_names = features
-    importances = model.feature_importances_
-    indices = np.argsort(importances)[::-1]
-    plt.figure(figsize=(10, 6))
-
-    # Plot the feature importances
-    plt.bar(range(len(indices)), importances[indices], color="b", align="center")
-
-    # Add feature names as x-axis labels
-    plt.xticks(range(len(indices)), feature_names[indices], rotation="vertical")
-
-    # Set labels and title
-    plt.xlabel("Features")
-    plt.ylabel("Importance")
-    plt.title("Feature Importances")
-    plt.savefig(os.path.join(modeldir, "/feature_importances.png"), bbox_inches="tight")
-    return
-
-
 def main(
     modeldir,
     annotation_files,
@@ -249,23 +227,6 @@ def main(
     with open(modeldir + "train.txt", "w") as filehandle:
         for f in set(train["filename"]):
             filehandle.write(f"{f}\n")
-    if not os.path.exists(modeldir + "/feature_importances.png"):
-        plot_feature_importances(modeldir, XGB_model, rel_features)
-    explainer = shap.Explainer(XGB_model)
-    shap_values = explainer.shap_values(X_train)
-    shap.summary_plot(
-        shap_values,
-        X_train,
-        show=False,
-        feature_names=rel_features,
-        max_display=X_train.shape[1],
-    )
-    plt.grid(False)  # Turn off gridlines
-    plt.savefig(
-        os.path.join(modeldir, "shap_values_plot.svg"),
-        format="svg",
-        bbox_inches="tight",
-    )
     print("Done")
     return
 
