@@ -1,10 +1,8 @@
 import pandas as pd
-import numpy as np
 from sys import argv
 import pickle as pk
 import os
 import train_FLAMES as tf
-import matplotlib.pyplot as plt
 import optimize_FLAMES as optf
 
 
@@ -66,7 +64,7 @@ def main(model_dir, input, pops_combi, filt, outdir, name="FLAMES_scores"):
             "FLAMES_score",
         ]
     ]
-    df.to_csv(f"{outdir}/{name}.txt")
+    df.to_csv(f"{outdir}/{name}.txt", sep="\t", index=False)
     return
 
 
