@@ -75,13 +75,16 @@ def optimize_params(
         else:
             f1 = 0
         # correct for simple closest gene prediction model as minimal baseline performance so that splits with only closest genes don't get overweighted
-        f1_corrected = f1_best / precision_closest_gene
+        if precision_closest_gene == 0:
+            f1_corrected = 0
+        else:
+            f1_corrected = f1_best / precision_closest_gene
     return best_params, f1_corrected
 
 
 def main(model, trainfiles, outdir, filter):
     # Load training data and trained model for hyperparams of model
-    XGB_model = pk.load(model)
+    XGB_model = pk.load(open(model, "rb"))
     data_file = os.path.join(trainfiles)
     data_list = []
     # Randomize order of loci
@@ -92,22 +95,25 @@ def main(model, trainfiles, outdir, filter):
     rng.shuffle(data_list)
     # Split the list into 50 parts for cross-validation
     num_splits = 50
-    names = data_list
-    data_list = [pd.read_csv(f, sep="\t") for f in data_list]
-    for i in range(len(data_list)):
-        data_list[i]["filename"] = names[i]
     split_data = np.array_split(data_list, num_splits)
+    data_list = []
+    for s in split_data:
+        s_list = []
+        for f in s:
+            df_s = pd.read_csv(f, sep="\t")
+            df_s["filename"] = f
+            s_list.append(df_s)
+        data_list.append(s_list)
 
     # Create a for loop to retrain each separate model on split data
     best_params = []
-    for i, data_split in enumerate(split_data):
+    for i, data_split in enumerate(data_list):
         train = []
-        for j, x in enumerate(split_data):
+        for j, x in enumerate(data_list):
             if j == i:
                 continue
-            train.extend(split_data[j])
+            train.extend(data_list[j])
         val = data_split
-        print("read data")
         train = tf.add_into_single_df(train)
         train_X, train_y, df = tf.create_XY_train(train, filter)
         # Load features used in model
@@ -116,7 +122,6 @@ def main(model, trainfiles, outdir, filter):
                 features = [l.strip() for l in f]
             train_X = train_X[features]
         # train model
-        print("train_model")
         model = XGB_model.fit(train_X, train_y)
         val = tf.add_into_single_df(val)
         val_X, val_y, df = tf.create_XY_train(val, filter)
