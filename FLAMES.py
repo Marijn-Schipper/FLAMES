@@ -199,7 +199,13 @@ def FLAMES(args):
         required=True,
     )
     parser.add_argument("-o", "--outdir", help="Output directory", required=True)
-    parser.add_argument("-f", "--filename", help="Output filename", required=False)
+    parser.add_argument(
+        "-f",
+        "--filename",
+        help="Output filename",
+        required=False,
+        default="FLAMES_scores",
+    )
     parser.add_argument(
         "-d",
         "--distance",
@@ -227,7 +233,7 @@ def FLAMES(args):
         args.weight,
         args.distance,
         args.outdir,
-        args.name,
+        args.filename,
     )
     return
 
