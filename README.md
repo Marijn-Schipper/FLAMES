@@ -1,5 +1,9 @@
+Thank you for your interest in using FLAMES for GWAS gene prioritization.
+The Python version of FLAMES is still being optimized. 
+If you have any problem using/installing FLAMES please open an issue.
+
 Instructions for installing FLAMES:
-1. Download the github
+1. Download the FLAMES from this GitHub
 2. Download the required annotation data from link
 3. Download MAGMA
 4. Download PoPS 
