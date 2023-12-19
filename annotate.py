@@ -41,7 +41,7 @@ def runtime(func):
         start = time.time()
         func(*args, **kwargs)
         end = time.time()
-        print(f"Runtime: {end - start}")
+        print(f"Runtime: {round(end - start, 2)}")
 
     return wrapper
 
@@ -955,8 +955,6 @@ def annotate_credset(
     genes = genes.drop_duplicates(subset=["ensg", "symbol"], keep="first")
     genes = get_EpiMap(os.path.join(Ann_path, "EpiMap"), genes, creds, prob_col)
     genes = genes.drop_duplicates(subset=["ensg", "symbol"], keep="first")
-    runtime = time.time() - start_time
-    print(f"Runtime of annotation: {runtime} seconds")
     genes = get_Promoters(
         os.path.join(Ann_path, "Promoter_regions"), genes, creds, prob_col, build
     )
@@ -1070,8 +1068,9 @@ def full_annotation_of_credset(
     locno = path_to_credset[1]
     path_to_credset = path_to_credset[0]
     outfile = os.path.join(
-        outdir, "FLAMES_annotated_" , os.path.basename(path_to_credset)
+        outdir, f"FLAMES_annotated_{os.path.basename(path_to_credset)}"
     )
+    print(outfile)
     if os.path.exists(outfile):
         print(f"Annotation file {outfile} already exists")
         return
