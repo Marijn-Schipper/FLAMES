@@ -144,11 +144,8 @@ def train_XGB(X_train_temp, y_train_temp, seed, group_kfold, groups):
     # Get the best model and its hyperparameters
     best_model = random_search.best_estimator_
     best_params = random_search.best_params_
-    print("Best Parameters:", best_params)
     XGB_model = best_model
     XGB_model.fit(X_train_temp, y_train_temp)
-
-    # Create a logistic regression model
     return XGB_model
 
 
@@ -213,8 +210,8 @@ def main(
     groups = df["filename"].values
     gss = GroupShuffleSplit(n_splits=5, train_size=0.8, random_state=42)
     gss.get_n_splits(X_train, y_train, groups)
-    XGB_model = train_XGB(X_train, y_train, seed, gss, groups)
     print("Training XGB")
+    XGB_model = train_XGB(X_train, y_train, seed, gss, groups)
     if not os.path.exists(modeldir):
         os.makedirs(modeldir)
     filename = os.path.join(modeldir, "FLAMES_XGB_model.sav")
@@ -224,10 +221,9 @@ def main(
     with open(f"{modeldir}/features.txt", "w") as filehandle:
         for feature in rel_features:
             filehandle.write(f"{feature}\n")
-    with open(modeldir + "train.txt", "w") as filehandle:
+    with open(os.path.join(modeldir, "train.txt"), "w") as filehandle:
         for f in set(train["filename"]):
             filehandle.write(f"{f}\n")
-    print("Done")
     return
 
 
