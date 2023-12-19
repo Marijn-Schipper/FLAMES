@@ -166,7 +166,7 @@ def optimize_FLAMES(args):
     parser.add_argument(
         "-i",
         "--input_files",
-        help="File containing the paths of all the inputfiles",
+        help="File containing the paths of all the inputfiles, can be the same files used to train your XGB model",
         required=True,
     )
     parser.add_argument(
@@ -252,11 +252,13 @@ def main():
         functional_annotation(args)
     elif command == "train":
         train_xgb(args)
+    elif command == "optimize":
+        optimize_FLAMES(args)
     elif command == "FLAMES":
         FLAMES(args)
     else:
         print(
-            "Command not recognized. Please use annotate, train or FLAMES as your first argument."
+            "Command not recognized. Please use annotate, train, optimize or FLAMES as your first argument."
         )
         sys.exit(1)
     return sys.exit(0)
