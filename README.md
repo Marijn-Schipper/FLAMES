@@ -4,7 +4,7 @@ If you have any problem using/installing FLAMES please open an issue.
 
 Instructions for installing FLAMES:
 1. Download the FLAMES from this GitHub
-2. Download the required annotation data from link
+2. Download the required annotation data from [link](https://zenodo.org/records/10409723)
 3. Download MAGMA
 4. Download PoPS 
 5. Create virtual enviroment  with required packages (recommended) or install needed packages.
