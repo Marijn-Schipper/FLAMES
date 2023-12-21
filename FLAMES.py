@@ -176,7 +176,8 @@ def optimize_FLAMES(args):
         "-m",
         "--modelpath",
         help="Path to trained model",
-        required=True,
+        required=False,
+        default=os.path.join(os.path.dirname(__file__), "model"),
     )
     parser.add_argument(
         "-d",
@@ -224,7 +225,8 @@ def FLAMES(args):
         "-m",
         "--modelpath",
         help="Path to trained model",
-        required=True,
+        required=False,
+        default=os.path.join(os.path.dirname(__file__), "model"),
     )
     args = parser.parse_args(args)
     FLAMES_scoring(
