@@ -64,6 +64,7 @@ def main(model_dir, input, pops_combi, filt, outdir, name="FLAMES_scores"):
             "FLAMES_score",
         ]
     ]
+    print(f"output written to {outdir}/{name}.txt")
     df.to_csv(f"{outdir}/{name}.txt", sep="\t", index=False)
     return
 
