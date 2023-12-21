@@ -1,6 +1,10 @@
+Thank you for your interest in using FLAMES for GWAS gene prioritization.
+The Python version of FLAMES is still being optimized. 
+If you have any problem using/installing FLAMES please open an issue.
+
 Instructions for installing FLAMES:
-1. Download the github
-2. Download the required annotation data from link
+1. Download the FLAMES from this GitHub
+2. Download the required annotation data from [link](https://zenodo.org/records/10409723)
 3. Download MAGMA
 4. Download PoPS 
 5. Create virtual enviroment  with required packages (recommended) or install needed packages.
@@ -8,7 +12,7 @@ Instructions for installing FLAMES:
 How to run FLAMES:
 1. Run MAGMA on your summary statistics to obtain gene-level Z-scores.
 2. Run MAGMA tissue type analysis using your MAGMA Z-scores on the preformatted GTEx tissue expression file.
-3. 2. Run PoPS on the generated MAGMA z-scores. The features used in the FLAMES manuscript can be downloaded from link.
+3. Run PoPS on the generated MAGMA z-scores. The features used in the FLAMES manuscript can be downloaded from link.
 4. Format your credible sets. The required format is two tab separated columns. 
 The first column should contain the SNPs in the credible set in the format CHR:BP:A1:A2 (e.g. 2:2345123:A:T).
 The second column should contain the fine-mapping PIP for each SNP.
