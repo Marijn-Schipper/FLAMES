@@ -1165,7 +1165,7 @@ def main(
 
     # Load PoPS & MAGMA scores
     PoPS = pd.read_csv(pops_out, sep="\t", engine="pyarrow")
-    magma_z = pd.read_csv(magma_z, delim_whitespace=True, engine="pyarrow")
+    magma_z = pd.read_csv(magma_z, delim_whitespace=True)
     magma_tissues = pd.read_csv(
         magma_tissue,
         delim_whitespace=True,
