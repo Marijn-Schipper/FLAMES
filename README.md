@@ -10,6 +10,8 @@ Instructions for installing FLAMES:
 5. Create virtual enviroment  with required packages (recommended) or install needed packages.
 
 How to run FLAMES:
+Step 1 and 2 can be performed by uploading your summary statistics to FUMA and running MAGMA there, and downloading the final results.
+
 1. Run MAGMA on your summary statistics to obtain gene-level Z-scores. You can find information on how to do this on the [MAGMA website](https://ctg.cncr.nl/software/magma).
 in general your command to run MAGMA will look like:
 ./magma \
