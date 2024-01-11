@@ -63,7 +63,7 @@ The INDEXFILE should contain:
 Filename : The path to the formatted credible set file
 GenomicLocus : the unique identifier that matches the GENOMIC_LOCI_FILE
    
-7. Run FLAMES score on the previously generated annotation file. The command will look something like:
+6. Run FLAMES score on the previously generated annotation file. The command will look something like:
 python FLAMES.py FLAMES \
 -i {FILE_CONTAINING_FILENAMES_OF_ANNOTATED_LOCI} \
 -o {DESIRED_OUTPUT_DIRECTORY} 
