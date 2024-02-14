@@ -7,6 +7,14 @@ import sys
 import argparse
 import pandas as pd
 
+def splash_screen():
+    print('*********************************************************************')
+    print('*Fine-mapped Locus Assesment Model of Effector geneS (FLAMES)')
+    print('* Version 1.0.0')
+    print('* (C) 2023 Marijn Schipper')
+    print('*********************************************************************')
+    print()
+
 
 def functional_annotation(args):
     parser = argparse.ArgumentParser(description="Annotate finemapped loci")
@@ -87,6 +95,15 @@ def functional_annotation(args):
         help="column name of PIP column in credset file",
         default="prob1",
     )
+    parser.add_argument(
+        "-t", "--tabix", help="path to tabix if using local CADD scores", default=False
+    )
+    parser.add_argument(
+        "-cf",
+        "--CADD_file",
+        help="path to CADD scores file if using local CADD scores, must match build of inputted credible variants",
+        default=False,
+    )
     args = parser.parse_args(args)
     # At least one of the arguments is required
     if not (args.indexfile or args.credsets_file):
@@ -116,6 +133,8 @@ def functional_annotation(args):
         args.cmd_vep,
         args.vep_cache,
         args.vep_docker,
+        args.tabix,
+        args.CADD_file,
     )
     return
 
@@ -245,9 +264,9 @@ def run_MAGMA_tisue_type(args):
 
 
 def main():
+    splash_screen()
     if len(sys.argv) < 2:
-        print("Usage: python FLAMES.py annotate/train/FLAMES [args...]")
-        sys.exit(1)
+        raise Exception("State FLAMES function like so: python FLAMES.py annotate/train/FLAMES/optimize [args...]")
     command = sys.argv[1]
     args = sys.argv[2:]
     if command == "annotate":
@@ -259,10 +278,9 @@ def main():
     elif command == "FLAMES":
         FLAMES(args)
     else:
-        print(
+        raise Exception(
             "Command not recognized. Please use annotate, train, optimize or FLAMES as your first argument."
         )
-        sys.exit(1)
     return sys.exit(0)
 
 
