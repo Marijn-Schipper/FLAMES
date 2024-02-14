@@ -130,7 +130,7 @@ def get_genes_in_locus(locus_no, path_to_genes_file, baseline_genes):
 # Get the genes in locus based on physical location of the locus
 def Genes_in_locus_bp_based(locus_no, GenomicRiskLoci, baseline_genes, lo=None):
     Locus = GenomicRiskLoci[
-        GenomicRiskLoci["GenomicLocus"].astype(int) == int(locus_no)
+        GenomicRiskLoci["GenomicLocus"].astype(str) == str(locus_no)
     ]
     start = Locus["start"].iloc[0]
     end = Locus["end"].iloc[0]
@@ -514,6 +514,7 @@ def run_vep_within_environment(
 
     environment_command = f"apptainer exec {environment_path} "
     vep_command = f" {vep_path} -i {input_file} -o {output_file} --cache {vep_cache} --assembly {build} --offline --force_overwrite"
+    print(environment_command + vep_command)
     subprocess.run(environment_command + vep_command, shell=True, check=True)
     return
 
@@ -528,6 +529,9 @@ def cmd_VEP(
         os.makedirs(outdir)
     output_lines = creds.copy()
     output_lines = output_lines.sort_values(["chr", "pos"])
+    output_lines[['a1', 'a2']] = output_lines[['a1', 'a2']].apply(lambda x: sorted(x), axis=1, result_type='expand')
+
+
     output_lines = output_lines.apply(
         lambda row: [
             f"{row['chr']} {row['pos']} {row['pos']} {row['a1']}/{row['a2']} +",
@@ -597,6 +601,43 @@ def get_CADD(creds, genes, prob_col, build):
     max_values = np.nanmax(np.where(matrix, creds["CADD_weighted"], 0), axis=1)
     genes["CADD_max"] = max_values
     return genes
+
+
+def tabix_CADD(chr, pos, a1, a2, CADD_path, tabix_path):
+    region_of_interest = f"{chr}:{pos}-{pos}"
+
+    # Run the tabix command and capture the output
+    command = f"{tabix_path} {CADD_path} {region_of_interest}"
+    result = subprocess.run(command, capture_output=True, shell=True)
+    tabix_output = result.stdout.decode("utf-8")
+    header = ["chr", "pos", "a1", "a2", "raw", "PHRED"]
+    tabix_output = tabix_output.split("\n")
+    tabix_output = [x.split("\t") for x in tabix_output if len(x.strip()) > 0]
+    df = pd.DataFrame(tabix_output, columns=header)  # ,dtype={'p':'string'})
+    if len(df) == 0:
+        return 0
+    ndf = df[(df["a1"] == a1) & (df["a2"] == a2)]
+    if len(ndf) == 1:
+        return float(ndf["PHRED"].iloc[0])
+    ndf = df[(df["a1"] == a2) & (df["a2"] == a1)]
+    if len(ndf) == 1:
+        return float(ndf["PHRED"].iloc[0])
+    return 0
+
+
+def get_CADD_cmd(creds, genes, prob_col, CADD_path, tabix_path):
+    creds["CADD"] = creds.apply(
+        lambda row: tabix_CADD(
+            row["chr"], row["pos"], row["a1"], row["a2"], CADD_path, tabix_path
+        ),
+        axis=1,
+    )
+    matrix = create_positional_mapping_matrix(genes, creds)
+    creds["CADD_weighted"] = creds["CADD"] * creds[prob_col]
+    genes["CADD_sum"] = np.dot(matrix, creds["CADD_weighted"])
+    max_values = np.nanmax(np.where(matrix, creds["CADD_weighted"], 0), axis=1)
+    genes["CADD_max"] = max_values
+    return
 
 
 # Get the Jung HiC interaction scores for each gene in the locus
@@ -890,6 +931,8 @@ def annotate_credset(
     cmd_vep,
     vep_cache,
     vep_docker,
+    tabix,
+    CADD_file,
     outdir,
     prob_col,
     magma=False,
@@ -912,7 +955,10 @@ def annotate_credset(
     if type(genes) == str:
         print("Error in querying VEP, exiting")
         return genes
-    genes = get_CADD(creds, genes, prob_col, build)
+    if CADD_file == False or tabix == False:
+        genes = get_CADD(creds, genes, prob_col, build)
+    else:
+        get_CADD_cmd(creds, genes, prob_col, CADD_file, tabix)
     genes = genes.drop_duplicates(subset=["ensg", "symbol"], keep="first")
     genes = get_eqtlgen_eQTLs(
         creds, genes, prob_col, os.path.join(Ann_path, "eQTLGen"), build
@@ -1063,6 +1109,8 @@ def full_annotation_of_credset(
     cmd_vep=False,
     vep_cache=False,
     vep_docker=False,
+    tabix=False,
+    CADD_file=False,
 ):
     # load credset
     locno = path_to_credset[1]
@@ -1103,6 +1151,8 @@ def full_annotation_of_credset(
         cmd_vep,
         vep_cache,
         vep_docker,
+        tabix,
+        CADD_file,
         outdir,
         prob_col,
         magma=magma_scores,
@@ -1159,6 +1209,8 @@ def main(
     cmd_vep=False,
     vep_cache=False,
     vep_docker=False,
+    tabix=False,
+    CADD_file=False,
 ):
     # Path for annotation files
     Ann_path = os.path.normpath(Annotation_dir)
@@ -1219,6 +1271,8 @@ def main(
                     cmd_vep,
                     vep_cache,
                     vep_docker,
+                    tabix,
+                    CADD_file,
                 )
             )
     else:
@@ -1252,6 +1306,8 @@ def main(
                 cmd_vep,
                 vep_cache,
                 vep_docker,
+                tabix,
+                CADD_file,
             )
         )
 
