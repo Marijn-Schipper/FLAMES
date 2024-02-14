@@ -1,3 +1,4 @@
+FLAMES version 1.0.0.
 Thank you for your interest in using FLAMES for GWAS gene prioritization.
 The Python version of FLAMES is still being optimized. 
 If you have any problem using/installing FLAMES please open an issue.
@@ -50,20 +51,20 @@ python FLAMES.py annotate \
 -id {PATH_TO_INDEXFILE} 
 
 The INDEXFILE should contain the following column including the header:
-Filename : The path to the formatted credible set file
+- Filename : The path to the formatted credible set file
 
 To run with predefined locus definitions add the -l flag with a the GENOMIC_LOCI_FILE. This file should contain the folowing tab separated collumns including headers:
-GenomicLocus : a unique identifier of a locus
-chr : the chromosome of the locus
-start : start of the locus location in bp
-end : the end of the locus location in bp
+- GenomicLocus : a unique identifier of a locus
+- chr : the chromosome of the locus
+- start : start of the locus location in bp
+- end : the end of the locus location in bp
 The GenomicLocus columns should now also be added to the INDEXFILE so that the credset matches the correct locus.
 
 The INDEXFILE should contain:
 Filename : The path to the formatted credible set file
 GenomicLocus : the unique identifier that matches the GENOMIC_LOCI_FILE
    
-7. Run FLAMES score on the previously generated annotation file. The command will look something like:
+6. Run FLAMES score on the previously generated annotation file. The command will look something like:
 python FLAMES.py FLAMES \
 -i {FILE_CONTAINING_FILENAMES_OF_ANNOTATED_LOCI} \
 -o {DESIRED_OUTPUT_DIRECTORY} 
