@@ -3,16 +3,28 @@ Thank you for your interest in using FLAMES for GWAS gene prioritization.
 The Python version of FLAMES is still being optimized. 
 If you have any problem using/installing FLAMES please open an issue.
 
-Instructions for installing FLAMES:
+##Installation
 1. Download the FLAMES from this GitHub
-2. Download the required annotation data from [Zenodo](https://zenodo.org/records/10409723)
-3. Download MAGMA
-4. Download PoPS 
-5. Create virtual enviroment  with required packages (recommended) or install needed packages.
+2. Download the required annotation data from [Zenodo](https://zenodo.org/records/10409723) 
+3. Create virtual enviroment  with required packages (recommended) or install needed packages.
+   You can do this using conda by running:
+       1: conda env create --file environment.yml
+       2: conda activate FLAMES
+   Or by running:
+       pip install -r requirements.txt
+   We highly recommend installing miniconda and creating an environment within conda as this provides a stable environment for FLAMES to run.
+This is everything you need to run the tutorial
+If you want to run FLAMES on your own GWAS results you will also need the following:
+MAGMA
+PoPS
+Finemapping results from statistical fine-mapping software e.g. FINEMAP or SusieR
 
-How to run FLAMES:
+#Example run:
+
+
+
+#Runing FLAMES on your own data from scratch
 Step 1 and 2 can be performed by uploading your summary statistics to FUMA and running MAGMA there, and downloading the final results.
-
 1. Run MAGMA on your summary statistics to obtain gene-level Z-scores. You can find information on how to do this on the [MAGMA website](https://ctg.cncr.nl/software/magma).
 in general your command to run MAGMA will look like:
 ./magma \
@@ -53,7 +65,7 @@ python FLAMES.py annotate \
 The INDEXFILE should contain the following column including the header:
 - Filename : The path to the formatted credible set file
 
-To run with predefined locus definitions add the -l flag with a the GENOMIC_LOCI_FILE. This file should contain the folowing tab separated collumns including headers:
+To run with predefined locus definitions add the -l flag with a the GENOMIC_LOCI_FILE. This file should contain the folowing tab separated columns including headers:
 - GenomicLocus : a unique identifier of a locus
 - chr : the chromosome of the locus
 - start : start of the locus location in bp
