@@ -3,7 +3,7 @@ Thank you for your interest in using FLAMES for GWAS gene prioritization.
 The Python version of FLAMES is still being optimized. 
 If you have any problem using/installing FLAMES please open an issue.
 
-### Installation
+# Installation
 1. Download the FLAMES from this GitHub
 2. Download the required annotation data from [Zenodo](https://zenodo.org/records/10409723) 
 3. Create virtual enviroment  with required packages (recommended) or install needed packages.
@@ -19,12 +19,12 @@ MAGMA
 PoPS
 Finemapping results from statistical fine-mapping software e.g. FINEMAP or SusieR
 
-### Running FLAMES
+# Running FLAMES
 ## Running FLAMES on example data:
 To run FLAMES on the provided example data navigate to the example_data folder in the downloaded FLAMES folder from this GitHub.
 Make sure you are in an environment that contains the dependencies needed for FLAMES and that you have downloaded the reference data from Zenodo as described in the Installation section.
 
-# Running annotation on example data
+### Running annotation on example data
 To run FLAMES on the provided example data run the following command:
 python {PATH_TO_FLAMES_FOLDER}/FLAMES.py annotate \
 -a {PATH_TO_DOWNLOADED_ANNOTATION_DATA}/Annotation_data/ \
@@ -39,7 +39,7 @@ python {PATH_TO_FLAMES_FOLDER}/FLAMES.py annotate \
 
 This will run FLAMES annotate on the four loci of twinning as described in the FLAMES paper.
 
-# FLAMES scoring on created annotated loci
+### FLAMES scoring on created annotated loci
 python {PATH_TO_FLAMES_FOLDER}/FLAMES.py FLAMES -id indexfile.txt -o ./
 
 This will score the generated annotated loci and produce the results reported for twinning in the FLAMES paper.
