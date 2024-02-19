@@ -10,6 +10,7 @@ If you have any problem using/installing FLAMES please open an issue.
    You can do this using conda by running:
        1: conda env create --file environment.yml
        2: conda activate FLAMES
+      When using Anaconda, you can select import and navigate to the environment.yml file contained in the downloaded FLAMES folder in git and run python within that environment.
    Or by running:
        pip install -r requirements.txt
    We highly recommend installing miniconda and creating an environment within conda as this provides a stable environment for FLAMES to run.
