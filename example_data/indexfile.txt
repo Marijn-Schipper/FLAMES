@@ -1,0 +1,5 @@
+Filename	GenomicLocus	Annotfiles
+locus_files/locus_1.cred1	1	annots/annotated_locus_1.txt
+locus_files/locus_2.cred1	2	annots/annotated_locus_2.txt
+locus_files/locus_3.cred1	3	annots/annotated_locus_3.txt
+locus_files/locus_4.cred1	4	annots/annotated_locus_4.txt

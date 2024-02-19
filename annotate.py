@@ -70,25 +70,19 @@ def liftover_row(chrom, pos, lo):
         newpos = newpos[0][1]
     except:
         newpos = np.nan
-        print(f"Unable to liftover position: {chrom}:{pos}")
+        print(f"\nUnable to liftover position: {chrom}:{pos}\n")
     return newpos
 
 
 # Fuction to liftover a pandas column of genomic locations to different build
 def liftover_df(lo, df, incols, outcol):
-    print(
-        df.apply(
-            lambda row: liftover_row(f"{row[incols[0]]}", int(row[incols[1]]), lo),
-            axis=1,
-        )
-    )
     df[outcol[0]] = df.apply(
         lambda row: liftover_row(f"{row[incols[0]]}", int(row[incols[1]]), lo),
         axis=1,
     )
     df = df.dropna(subset=[outcol[0]])
     if len(df) == 0:
-        print("No variants in credible set could be lifted over")
+        print("\nNo variants in credible set could be lifted over\n")
         return None
     return df
 
@@ -96,9 +90,9 @@ def liftover_df(lo, df, incols, outcol):
 ### Functions for annotation of credible sets
 # Get the genes in a locus based on the FUMA genes file
 def get_genes_in_locus(locus_no, path_to_genes_file, baseline_genes):
-    genes = pd.read_csv(path_to_genes_file, sep="\t")
+    genes = pd.read_csv(baseline_genes, sep="\t")
     if not "GenomicLocus" in genes.columns:
-        gene_info = pd.read_csv(baseline_genes, sep="\t")
+        gene_info = pd.read_csv(genes, sep="\t")
         relevant_genes = baseline_genes[
             baseline_genes["external_gene_name"].isin(genes["gene"])
         ]
@@ -483,6 +477,9 @@ def get_VEP(creds, genes, prob_col, build):
     )
     if any(VEPs.apply(lambda x: isinstance(x, str))):
         return "Cancel annotation due to timeout in VEP"
+    vars = []
+    found_genes = []
+    consequences = []
     for i, query in enumerate(VEPs):
         variants = query[0]
         PiP = creds[prob_col][i]
@@ -492,14 +489,19 @@ def get_VEP(creds, genes, prob_col, build):
             if not "gene_id" in variant.keys():
                 continue
             consequence = float(PiP) * float(VEP_dict[variant["impact"]])
-            gene = variant["gene_id"]
-            if gene in scores:
-                scores[gene].append(consequence)
-            else:
-                scores[gene] = [consequence]
-    genes[["VEP_max", "VEP_sum"]] = genes["ensg"].apply(
-        lambda row: pd.Series([max(scores.get(row, [0])), sum(scores.get(row, [0]))])
-    )
+            vars.append(i)
+            found_genes.append(variant["gene_id"])
+            consequences.append(consequence)
+    vep_df = pd.DataFrame()
+    vep_df["ensg"] = found_genes
+    vep_df["consequence"] = consequences
+    vep_df['variant'] = vars  
+    vep_df = vep_df.groupby(["ensg", "variant"])["consequence"].max().reset_index()  
+    vep_df["VEP_max"] = vep_df.groupby("ensg")["consequence"].transform("max")
+    vep_df["VEP_sum"] = vep_df.groupby("ensg")["consequence"].transform("sum")
+    vep_df = vep_df[["ensg", "VEP_sum", "VEP_max"]]
+    genes = genes.merge(vep_df, on="ensg", how="left")
+    genes.fillna(0, inplace=True)
     return genes
 
 
@@ -512,9 +514,8 @@ def run_vep_within_environment(
     else:
         build = "GRCh37"
 
-    environment_command = f"apptainer exec {environment_path} "
+    environment_command = f"{environment_path} "
     vep_command = f" {vep_path} -i {input_file} -o {output_file} --cache {vep_cache} --assembly {build} --offline --force_overwrite"
-    print(environment_command + vep_command)
     subprocess.run(environment_command + vep_command, shell=True, check=True)
     return
 
@@ -570,8 +571,8 @@ def cmd_VEP(
     )
     creds.drop(columns=["VEP_merge_id"], inplace=True)
     vep_df["VEP_weighted"] = vep_df["VEP"] * vep_df[prob_col]
-    vep_df["VEP_sum"] = vep_df.groupby("Gene")["VEP_weighted"].transform("sum")
     vep_df["VEP_max"] = vep_df.groupby("Gene")["VEP_weighted"].transform("max")
+    vep_df["VEP_sum"] = vep_df.groupby("Gene")["VEP_weighted"].transform("sum")
     vep_df = vep_df[["Gene", "VEP_sum", "VEP_max"]]
     genes = genes.merge(vep_df, left_on="ensg", right_on="Gene", how="left")
     genes.drop(columns=["Gene"], inplace=True)
@@ -935,6 +936,7 @@ def annotate_credset(
     CADD_file,
     outdir,
     prob_col,
+    fname,
     magma=False,
     trainset=False,
     filter=False,
@@ -942,21 +944,29 @@ def annotate_credset(
     genes = get_TSS_distances(creds, genes, prob_col, build)
     if trainset:
         if not check_dist_to_causal(genes, dist=750000):
-            exit("The true positive causal gene is too far from lead SNP")
+            exit("The true positive causal gene is too far from lead SNP for {fname}")
     genes = genes[genes["distance"] <= 750000]
     start_time = time.time()
-    print("starting_annotation")
     if cmd_vep == False:
         genes = get_VEP(creds, genes, prob_col, build)
+        if len(genes) == 0:
+            print("\nError in querying VEP, exiting\n")
+            return genes
     else:
         genes = cmd_VEP(
             creds, genes, prob_col, build, cmd_vep, vep_cache, vep_docker, outdir
         )
+        if len(genes) == 0:
+            print("\nError in querying VEP, this could be due to the VEP API server. Please try again later or contact our GitHub, exiting\n")
+            return genes
     if type(genes) == str:
-        print("Error in querying VEP, exiting")
+        print("\nError in querying VEP, exiting\n")
         return genes
     if CADD_file == False or tabix == False:
         genes = get_CADD(creds, genes, prob_col, build)
+        if len(genes) == 0:
+            print("\nError in querying CADD, this could be due to the VEP API server. Please try again later or contact our GitHub, exiting\n")
+            return genes
     else:
         get_CADD_cmd(creds, genes, prob_col, CADD_file, tabix)
     genes = genes.drop_duplicates(subset=["ensg", "symbol"], keep="first")
@@ -1059,7 +1069,6 @@ def check_risk_loci(GenomicRiskLoci, creds, locno, filter):
         GenomicRiskLoci = pd.DataFrame()
         GenomicRiskLoci["GenomicLocus"] = [locno]
         GenomicRiskLoci["chr"] = min(creds["chr"])
-        print(GenomicRiskLoci)
         if filter == False:
             annot_range = 750000
         else:
@@ -1111,38 +1120,52 @@ def full_annotation_of_credset(
     vep_docker=False,
     tabix=False,
     CADD_file=False,
+    c95=True
 ):
     # load credset
     locno = path_to_credset[1]
+    given_outname = path_to_credset[2]
     path_to_credset = path_to_credset[0]
-    outfile = os.path.join(
-        outdir, f"FLAMES_annotated_{os.path.basename(path_to_credset)}"
-    )
-    print(outfile)
+    if given_outname == None:
+        outfile = os.path.join(
+            outdir, f"FLAMES_annotated_{os.path.basename(path_to_credset)}"
+        )
+    else:
+        outfile = given_outname
+        try:
+            outdir = os.path.dirname(outfile)
+        except:
+            outdir = os.getcwd()
+    if outdir == "":
+        outdir = os.getcwd()
     if os.path.exists(outfile):
-        print(f"Annotation file {outfile} already exists")
+        print(f"\nAnnotation file {outfile} already exists")
         return
     creds = pd.read_csv(path_to_credset, delim_whitespace=True, comment="#").dropna()
-    creds = create_95perc_credset(creds, prob_col)
+    if c95 == True:
+        creds = create_95perc_credset(creds, prob_col)
     creds[["chr", "pos", "a1", "a2"]] = creds[SNP_col].str.split(r"[:_]", expand=True)
-    print(creds)
     creds[["chr", "pos"]] = creds[["chr", "pos"]].astype(np.int32)
     if build == "GRCH38":
         creds = liftover_df(lo, creds, ["chr", "pos"], ["pos_37"])
     if creds is None:
-        print(f"No variants in locus {locno} as read from {path_to_credset}")
+        print(f"\nNo variants in locus {locno} as read from {path_to_credset}")
         return
     GenomicRiskLoci = check_risk_loci(GenomicRiskLoci, creds, locno, filter)
     ref_genes = os.path.join(Ann_path, "ENSG/ENSG.v102.genes.txt")
     if os.path.exists(genes):
-        genes = get_genes_in_locus(locno, ref_genes)
+        genes = get_genes_in_locus(locno, ref_genes, genes)
     else:
         genes = Genes_in_locus_bp_based(locno, GenomicRiskLoci, ref_genes, lo)
+    if len(genes) == 0:
+        print(f"\nNo genes in locus {locno}")
+        return
     if trainset:
         causal = check_TP_genes(genes, trainset)
         if sum(list(genes["ensg"].isin(causal["ensg"]).astype(int))) == 0:
-            print(f"No causal genes in locus {outfile}")
+            print(f"\nNo causal genes in locus {outfile}")
             return
+    fname = os.path.basename(outfile)
     genes = annotate_credset(
         genes,
         creds,
@@ -1155,12 +1178,13 @@ def full_annotation_of_credset(
         CADD_file,
         outdir,
         prob_col,
+        fname,
         magma=magma_scores,
         trainset=False,
         filter=filter,
     )
     if type(genes) == str:
-        print(f"{outfile} was not created due to VEP timeout")
+        print(f"\n{outfile} was not created due to VEP server timeout. Please try again at a later time or set up command line vep")
         return
     genes = POPS_MAGMA_annotation(genes, magma_z, PoPS)
     if trainset:
@@ -1184,10 +1208,26 @@ def full_annotation_of_credset(
 def check_dist_to_causal(genes, trainset, dist=750000):
     causal = check_TP_genes(genes, trainset)
     if causal["dist"].min() > dist:
-        print("WARNING: Credible set is too far away from causal gene")
+        print("\nWARNING: Credible set is too far away from causal gene")
         return False
     return True
 
+def progress_bar(iterable, length=20):
+    total = len(iterable)
+    progress = 0
+    start_time = time.time()
+
+    for i, item in enumerate(iterable):
+        yield item
+        progress = i + 1
+        percentage = progress / total
+        progress_length = int(length * percentage)
+        elapsed_time = time.time() - start_time
+
+        sys.stdout.write('\033[K')  # Clear the line
+        sys.stdout.write(f"\r[{'=' * progress_length}{' ' * (length - progress_length)}] {progress}/{total} ({percentage:.1%}) - Locus processed in: {elapsed_time:.2f}s")
+        sys.stdout.flush()
+    sys.stdout.write('\n')
 
 # Main fuction to call that will run the annotation for each credset
 @runtime
@@ -1211,6 +1251,7 @@ def main(
     vep_docker=False,
     tabix=False,
     CADD_file=False,
+    c95=True
 ):
     # Path for annotation files
     Ann_path = os.path.normpath(Annotation_dir)
@@ -1248,13 +1289,15 @@ def main(
         credsets = pd.read_csv(index_file, sep="\t")
         if not "GenomicLocus" in credsets.columns:
             credsets["GenomicLocus"] = range(1, len(credsets) + 1)
+        if not "Annotfiles" in credsets.columns:
+            credsets["Annotfiles"] = None
         for index, row in credsets.iterrows():
             if GRL_check == "absent":
                 GenomicRiskLoci = False
                 locno = row["GenomicLocus"]
             infiles.append(
                 (
-                    (row["Filename"], row["GenomicLocus"]),
+                    (row["Filename"], row["GenomicLocus"],row["Annotfiles"]),
                     build,
                     GenomicRiskLoci,
                     Ann_path,
@@ -1273,6 +1316,7 @@ def main(
                     vep_docker,
                     tabix,
                     CADD_file,
+                    c95
                 )
             )
     else:
@@ -1289,7 +1333,7 @@ def main(
             locno = 1
         infiles.append(
             (
-                (credset_file, locno),
+                (credset_file, locno, None),
                 build,
                 GenomicRiskLoci,
                 Ann_path,
@@ -1308,10 +1352,11 @@ def main(
                 vep_docker,
                 tabix,
                 CADD_file,
+                c95,
             )
         )
-
-    for infile in infiles:
+    print('Starting_annotation:')
+    for infile in progress_bar(infiles):
         full_annotation_of_credset(*infile)
     return
 

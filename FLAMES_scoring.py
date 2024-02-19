@@ -12,14 +12,15 @@ def main(model_dir, input, pops_combi, filt, outdir, name="FLAMES_scores"):
             model = file
     FLAMES = pk.load(open(model_dir + "/" + model, "rb"))
     infiles = []
-    if os.path.isdir(input):
-        for file in os.listdir(input):
+    if type(input) == list:
+        infiles = input
+    elif os.path.isdir(input):
             if "annotated_" in file:
                 infiles.append(os.path.join(input, file))
-    if os.path.isfile(input):
-        with open(input) as f:
-            for l in f:
-                infiles.append(l.strip())
+            if len(infiles) == 0:
+                raise Exception("No annotated credsets starting with 'annotated_' found in directory")
+    else:
+        raise Exception("Inputfiles not found or not in the right format")
     dfs = [pd.read_csv(f, sep="\t") for f in infiles]
     for i in range(len(dfs)):
         dfs[i]["filename"] = infiles[i]
@@ -64,7 +65,7 @@ def main(model_dir, input, pops_combi, filt, outdir, name="FLAMES_scores"):
             "FLAMES_score",
         ]
     ]
-    print(f"output written to {outdir}/{name}.txt")
+    print(f"output written to {os.path.join(outdir, name)}.txt")
     df.to_csv(f"{outdir}/{name}.txt", sep="\t", index=False)
     return
 

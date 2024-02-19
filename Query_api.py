@@ -108,7 +108,7 @@ class EnsemblRestClient(object):
 
 def query_VEP(chr, pos, a1, a2, build):
     client = EnsemblRestClient()
-    if build == "GRCh37":
+    if build == "GRCH37":
         client.server = "http://grch37.rest.ensembl.org"
     else:
         client.server = "http://rest.ensembl.org"

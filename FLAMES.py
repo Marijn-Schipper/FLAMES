@@ -19,7 +19,7 @@ def splash_screen():
 def functional_annotation(args):
     parser = argparse.ArgumentParser(description="Annotate finemapped loci")
     parser.add_argument("-c", "--credsets_file", help="File containing credible set")
-    parser.add_argument("-o", "--outdir", help="Output directory", required=True)
+    parser.add_argument("-o", "--outdir", help="Output directory, if not specifying output filenames in an indexfile", required=False, default = None)
     parser.add_argument(
         "-l",
         "--GenomicRiskLoci",
@@ -62,6 +62,7 @@ def functional_annotation(args):
         "-tp",
         "--true_positives",
         help="Path to the file that describes the true positive genes in each locus",
+        default = False
     )
     parser.add_argument(
         "-id",
@@ -73,6 +74,7 @@ def functional_annotation(args):
         "--filter",
         help="Filter the credible sets to only include those with a posterior probability of 0.95 or greater",
         action="store_true",
+        default=750000,
     )
     parser.add_argument(
         "-cv", "--cmd_vep", help="path to the vep executable", default=False
@@ -104,6 +106,7 @@ def functional_annotation(args):
         help="path to CADD scores file if using local CADD scores, must match build of inputted credible variants",
         default=False,
     )
+    parser.add_argument('-c95', '--credset_95', help='Input "FALSE" to not subset to 0.95 credible set', required=False, default=True)
     args = parser.parse_args(args)
     # At least one of the arguments is required
     if not (args.indexfile or args.credsets_file):
@@ -114,6 +117,10 @@ def functional_annotation(args):
         if os.path.isfile(args.indexfile) == False:
             parser.error(
                 f"The indexfile {args.indexfile} does not exist or is not a file."
+            )
+        elif args.outdir == None and not 'Annotfiles' in open(args.indexfile).readlines()[0]:
+            parser.error(
+                "When using an indexfile, an output directory must be specified or the column annotfiles must exist."
             )
     annotate(
         args.credsets_file,
@@ -135,6 +142,7 @@ def functional_annotation(args):
         args.vep_docker,
         args.tabix,
         args.CADD_file,
+        args.credset_95,
     )
     return
 
@@ -150,7 +158,7 @@ def train_xgb(args):
         required=True,
     )
     parser.add_argument(
-        "-o", "--outdir", help="Output directory for the trained model", required=True
+        "-o", "--outdir", help="Output directory for the trained model", required=False
     )
     parser.add_argument(
         "-d",
@@ -216,8 +224,9 @@ def FLAMES(args):
         "-i",
         "--input_files",
         help="File containing the paths of all the inputfiles, or directory containing annotated files with annotated_ in the filename",
-        required=True,
+        required=False,
     )
+    parser.add_argument('-id', '--indexfile', help='Tab/space delim. file containing the annotated loci input files under the column name Annotfiles ', required=False)
     parser.add_argument("-o", "--outdir", help="Output directory", required=True)
     parser.add_argument(
         "-f",
@@ -248,9 +257,22 @@ def FLAMES(args):
         default=os.path.join(os.path.dirname(__file__), "model"),
     )
     args = parser.parse_args(args)
+    if args.indexfile != None:
+        if os.path.isfile(args.indexfile):
+            try:
+                inputfiles = list(pd.read_csv(args.indexfile, sep = "\t")['Annotfiles'])
+            except:
+                raise Exception("Indexfile not found or not in the right format")
+        else:
+            inputfiles = args.input_files
+    elif args.input_files != None:
+        try:
+            inputfiles = open(args.input_files).read().splitlines()
+        except:
+            raise Exception("Inputfiles not found or not in the right format")
     FLAMES_scoring(
         args.modelpath,
-        args.input_files,
+        inputfiles,
         args.weight,
         args.distance,
         args.outdir,
