@@ -3,7 +3,7 @@ Thank you for your interest in using FLAMES for GWAS gene prioritization.
 The Python version of FLAMES is still being optimized. 
 If you have any problem using/installing FLAMES please open an issue.
 
-##Installation
+### Installation
 1. Download the FLAMES from this GitHub
 2. Download the required annotation data from [Zenodo](https://zenodo.org/records/10409723) 
 3. Create virtual enviroment  with required packages (recommended) or install needed packages.
@@ -19,11 +19,32 @@ MAGMA
 PoPS
 Finemapping results from statistical fine-mapping software e.g. FINEMAP or SusieR
 
-#Example run:
+### Running FLAMES
+## Running FLAMES on example data:
+To run FLAMES on the provided example data navigate to the example_data folder in the downloaded FLAMES folder from this GitHub.
+Make sure you are in an environment that contains the dependencies needed for FLAMES and that you have downloaded the reference data from Zenodo as described in the Installation section.
 
+# Running annotation on example data
+To run FLAMES on the provided example data run the following command:
+python {PATH_TO_FLAMES_FOLDER}/FLAMES.py annotate \
+-a {PATH_TO_DOWNLOADED_ANNOTATION_DATA}/Annotation_data/ \
+-p PoPS.preds \
+-m magma.genes.out \
+-mt magma_exp_gtex_v8_ts_avg_log2TPM.txt.gsa.out \
+-id indexfile.txt  \
+-pc prob1 \
+-sc cred1 \
+-g genes.txt \
+-c95 False
 
+This will run FLAMES annotate on the four loci of twinning as described in the FLAMES paper.
 
-#Runing FLAMES on your own data from scratch
+# FLAMES scoring on created annotated loci
+python {PATH_TO_FLAMES_FOLDER}/FLAMES.py FLAMES -id indexfile.txt -o ./
+
+This will score the generated annotated loci and produce the results reported for twinning in the FLAMES paper.
+
+## Running FLAMES on your data from scratch
 Step 1 and 2 can be performed by uploading your summary statistics to FUMA and running MAGMA there, and downloading the final results.
 1. Run MAGMA on your summary statistics to obtain gene-level Z-scores. You can find information on how to do this on the [MAGMA website](https://ctg.cncr.nl/software/magma).
 in general your command to run MAGMA will look like:
