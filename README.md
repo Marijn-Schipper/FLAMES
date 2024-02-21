@@ -55,22 +55,27 @@ Step 1 and 2 can be performed by uploading your summary statistics to FUMA and r
 ### 1. Run MAGMA on your summary statistics to obtain gene-level Z-scores. 
 You can find information on how to do this on the [MAGMA website](https://ctg.cncr.nl/software/magma).
 in general your command to run MAGMA will look like:
+```
 ./magma \
  --bfile {PATH_TO_REFERENCE_PANEL_PLINK} \
  --gene-annot {PATH_TO_MAGMA_ANNOT}.genes.annot \
  --pval {PATH_TO_SUMSTATS}.txt ncol=N \
  --gene-model snp-wise=mean \
  --out {DESIRED_ZSCORE_FILENAME}
+```
    
 ### 2. Run MAGMA tissue type analysis using your MAGMA Z-scores on the preformatted GTEx tissue expression file. 
 The command uses the previously generated MAGMA gene Z-scores and GTEx expression file which can be found on [Zenodo](https://zenodo.org/records/10409723)
+```
 ./magma \
 --gene-results {DESIRED_ZSCORE_FILENAME}.genes.raw \
 --gene-covar {PATH_TO_DOWNLOADED_GTEx_FILE}/gtex_v8_ts_avg_log2TPM.txt \
 --out {DESIRED_TISSUE_RELEVANCE_FILENAME}
+```
 
 ### 3. Run PoPS on the generated MAGMA z-scores. 
 The features used in the FLAMES manuscript can be downloaded from [Zenodo](https://zenodo.org/records/10409723). You can find the github for PoPS [here](https://github.com/FinucaneLab/pops).
+```
 python pops.py \
 --gene_annot_path {PATH_TO_DOWNLOADED_FEATURES}\pops_features_pathway_naive/gene_annot.txt \
 --feature_mat_prefix {PATH_TO_DOWNLOADED_FEATURES}\pops_features_pathway_naive/munged_features/pops_features \
@@ -78,6 +83,7 @@ python pops.py \
 --magma_prefix {PATH_TO_GENERATED_MAGMA_Z_SCORES}\{DESIRED_ZSCORE_FILENAME} \
 --control_features {PATH_TO_DOWNLOADED_FEATURES}\pops_features_pathway_naive/control.features \
 --out_prefix {DESIRED_POPS_OUTPUT_PREFIX)
+```
    
 ### 4. Format your credible sets. 
 The required format is two tab separated columns. 
@@ -86,6 +92,7 @@ The second column should contain the fine-mapping PIP for each SNP.
 
 ### 5. Run FLAMES annotate on the credible set. 
 This generates a file with all SNP-to-gene evidence from the credible set for genes in the locus, plus MAGMA-Z and PoPS scores. An example command could be:
+```
 python FLAMES.py annotate \
 -o {DESIRED_OUTPUT_DIRECTORY} \
 -a {PATH_TO_THE_DOWNLOADED_ANNOTATION_DATA_DIRECTORY} \
@@ -93,6 +100,7 @@ python FLAMES.py annotate \
 -m {DESIRED_ZSCORE_FILENAME}.genes.out \
 -mt {DESIRED_TISSUE_RELEVANCE_FILENAME}.gsa.out \
 -id {PATH_TO_INDEXFILE} 
+```
 
 The INDEXFILE should contain the following column including the header:
 - Filename : The path to the formatted credible set file
@@ -111,10 +119,15 @@ The GenomicLocus columns should now also be added to the INDEXFILE so that the c
    GenomicLocus : the unique identifier that matches the GENOMIC_LOCI_FILE
    
 ### 6. Run FLAMES scoring on the previously generated annotation file. 
+For running FLAMES scoring you should run FLAMES.py FLAMES with the following options:
+-id or -i where :id points to a tab delimited txt file containing the column Annotfiles with the output from FLAMES annotate that you want to score. i will point to a txt file containing all the desired input files. Each file should be on their own line.
+-o: the desired output directory or filename.
 The command will look something like:
+```
 python FLAMES.py FLAMES \
 -id {INDEX_FILE_NCLUDING_COLUMN Annotfiles} \
 -o {DESIRED_OUTPUT_DIRECTORY}
+```
 
 
 Running FLAMES annotate faster:
