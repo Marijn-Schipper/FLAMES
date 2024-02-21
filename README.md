@@ -13,7 +13,7 @@ You can do this either by using conda by running:
       When using Anaconda, you can select import and navigate to the environment.yml file contained in the downloaded FLAMES folder in git and run python within that environment.
 Or by running:
        ```pip install -r requirements.txt```
-   We highly recommend installing miniconda and creating an environment within conda as this provides a stable environment for FLAMES to run.__
+   We highly recommend installing miniconda and creating an environment within conda as this provides a stable environment for FLAMES to run.
    
 
 This is everything you need to run the tutorial
