@@ -26,7 +26,11 @@ To run FLAMES on the provided example data navigate to the example_data folder i
 Make sure you are in an environment that contains the dependencies needed for FLAMES and that you have downloaded the reference data from Zenodo as described in the Installation section.
 
 ### Running annotation on example data
-To run FLAMES on the provided example data run the following command:
+To run FLAMES on the provided example data run the following commands:
+Change to the example data directory:
+cd example_data
+Run flames annotate. This should take around 1 minute.
+```
 python {PATH_TO_FLAMES_FOLDER}/FLAMES.py annotate \
 -a {PATH_TO_DOWNLOADED_ANNOTATION_DATA}/Annotation_data/ \
 -p PoPS.preds \
@@ -37,6 +41,7 @@ python {PATH_TO_FLAMES_FOLDER}/FLAMES.py annotate \
 -sc cred1 \
 -g genes.txt \
 -c95 False
+```
 
 This will run FLAMES annotate on the four loci of twinning as described in the FLAMES paper.
 
