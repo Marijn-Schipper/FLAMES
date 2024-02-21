@@ -7,13 +7,15 @@ If you have any problem using/installing FLAMES please open an issue.
 1. Download the FLAMES from this GitHub
 2. Download the required annotation data from [Zenodo](https://zenodo.org/records/10417198) 
 3. Create virtual enviroment  with required packages (recommended) or install needed packages.
-   You can do this either by using conda by running:
+You can do this either by using conda by running:__
        1: ```conda env create --file environment.yml```
-       2: ```conda activate FLAMES```
+       2: ```conda activate FLAMES``` __
       When using Anaconda, you can select import and navigate to the environment.yml file contained in the downloaded FLAMES folder in git and run python within that environment.
-   Or by running:
-       ```pip install -r requirements.txt```
-   We highly recommend installing miniconda and creating an environment within conda as this provides a stable environment for FLAMES to run.
+Or by running:__
+       ```pip install -r requirements.txt```__
+   We highly recommend installing miniconda and creating an environment within conda as this provides a stable environment for FLAMES to run.__
+   __
+
 This is everything you need to run the tutorial
 If you want to run FLAMES on your own GWAS results you will also need the following:
 MAGMA
