@@ -98,4 +98,4 @@ dependencies:
   - zstd=1.5.5=hfc55251_0
   - pip:
       - xgboost==1.7.5
-prefix: /home/schipper/miniconda3/envs/FLAMES_pip
+
