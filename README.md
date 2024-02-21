@@ -29,8 +29,8 @@ Make sure you are in an environment that contains the dependencies needed for FL
 
 ### Running annotation on example data
 To run FLAMES on the provided example data run the following commands:
-Change to the example data directory:
-cd example_data
+Change to the example data directory:  
+```cd example_data```  
 Run flames annotate. This should take around 1 minute.
 ```
 python {PATH_TO_FLAMES_FOLDER}/FLAMES.py annotate \
