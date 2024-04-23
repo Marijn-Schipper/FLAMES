@@ -115,6 +115,7 @@ To run with predefined locus definitions add the -l flag with a the GENOMIC_LOCI
 - chr : the chromosome of the locus
 - start : start of the locus location in bp
 - end : the end of the locus location in bp
+  
 The GenomicLocus columns should now also be added to the INDEXFILE so that the credset matches the correct locus.
    The INDEXFILE should then contain:
    Filename : The path to the formatted credible set file
