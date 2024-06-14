@@ -1,6 +1,8 @@
-FLAMES version 1.0.0.
+FLAMES version 1.1.1.
+Please note that the version found in the FLAMES preprint can be found under release 1.0.0
+
 Thank you for your interest in using FLAMES for GWAS gene prioritization.
-The Python version of FLAMES is still being optimized. 
+The python version of FLAMES is still being optimized. 
 If you have any problem using/installing FLAMES please open an issue.
 
 # Installation
