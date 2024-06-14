@@ -143,7 +143,7 @@ FLAMES.py FLAMES generates two output files:
 - FLAMES.preds is a tab-delimited file containing the scored annotation filename, the predicted gene, the raw and scaled FLAMES scores,  and the estimated precision of the prediction. \
        - FLAMES.preds only contain genes above the cumulative 75% precision threshold as previously calibrated in the FLAMES paper. 
 - FLAMES_scores.raw contains the raw XGB and PoPS scores, scaled PoPS scores, the raw and scaled FLAMES scores, and the estimated precision of prediction if applicable. \
-       - Scaled PoPS scores are scaled from 0.292 to 1 (see paper) 
+       - Scaled PoPS scores are scaled from 0.292 to 1 (see paper) \
        - Scaled FLAMES scores is calculated as the raw FLAMES score of a gene divided by the sum of raw FLAMES scores of all genes in the locus
        
 
