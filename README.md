@@ -149,8 +149,15 @@ FLAMES.py FLAMES generates two output files:
 
 ### Note on running FLAMES faster. 
 Running FLAMES annotate faster:
-Default FLAMES will query the VEP API for the variants within your credible sets for the VEP features of interest.
+Default FLAMES will query the VEP & CADD API for the variants within your credible sets for the VEP features of interest.
 This is the biggest bottleneck for annotation speed. You can significantly speed up this process by running a command line version of VEP.
-Please use the --cmd-vep and --vep-cache and --vep_docker flags to use the cmd line version of VEP for FLAMES.
+Please use the --cmd-vep and --vep-cache to use the cmd line version of VEP for FLAMES.
+--cmd-vep should be the command to run the vep application
+--vep-cache should point to the local vep cahche
+
+CADD scores can by extracted locally by downloading tabixed CADD scores.
+-t should point to your tabix installation
+-cf should point to a tabixed CADD file
+
 
 
