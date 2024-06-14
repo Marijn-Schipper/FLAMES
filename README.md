@@ -134,7 +134,18 @@ python FLAMES.py FLAMES \
 -o {DESIRED_OUTPUT_DIRECTORY}
 ```
 
+### FLAMES output format
+FLAMES generates three output files.
+FLAMES.py annotate generates a tab delimited file containing all the gene-level annotations as annotated from the provided credible sets. 
+FLAMES.py FLAMES generates two output files
+-- FLAMES.preds is a tab-delimited file containing the scored annotation filename, the predicted gene, the raw and scaled FLAMES scores,  and the estimated precision of the prediction.
+       FLAMES.preds only contain genes above the cumulative 75% precision threshold as previously calibrated in the FLAMES paper.
+--FLAMES_scores contain the raw XGB and PoPS scores, scaled PoPS scores, the raw and scaled FLAMES scores, and the estimated precision of prediction if applicable.
+       Scaled PoPS scores are scaled from 0.292 to 1 (see paper)
+       Scaled FLAMES scores is calculated as the raw FLAMES score of a gene divided by the sum of raw FLAMES scores of all genes in the locus
+       
 
+### Note on running FLAMES faster. 
 Running FLAMES annotate faster:
 Default FLAMES will query the VEP API for the variants within your credible sets for the VEP features of interest.
 This is the biggest bottleneck for annotation speed. You can significantly speed up this process by running a command line version of VEP.
