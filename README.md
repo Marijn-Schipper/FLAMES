@@ -76,7 +76,7 @@ The command uses the previously generated MAGMA gene Z-scores and GTEx expressio
 ```
 
 ### 3. Run PoPS on the generated MAGMA z-scores. 
-The features used in the FLAMES manuscript can be downloaded from [Zenodo](https://zenodo.org/records/10409723). You can find the github for PoPS [here](https://github.com/FinucaneLab/pops).
+The features used in the FLAMES manuscript, or features compatible with FUMA MAGMA Z-scores, can be downloaded from [Zenodo](https://zenodo.org/records/10409723). You can find the github for PoPS [here](https://github.com/FinucaneLab/pops). 
 ```
 python pops.py \
 --gene_annot_path {PATH_TO_DOWNLOADED_FEATURES}\pops_features_pathway_naive/gene_annot.txt \
