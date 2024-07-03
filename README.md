@@ -110,6 +110,13 @@ The INDEXFILE should contain the following column including the header:
 To predefine the output names of all the generated credible sets, also create the column Annotfiles.
 - Annotfiles : path and outputname for credible set. (e.g. /home/annotated_loci/annotated_locus_1.txt)
 
+An example of an indexfile is given here:
+```
+Filename       Annotfiles
+locus_1.txt       FLAMES_annotated_locus_1.txt
+locus_134.txt       FLAMES_annotated_locus_134.txt 
+```
+
 To run with predefined locus definitions add the -l flag with a the GENOMIC_LOCI_FILE. This file should contain the folowing tab separated columns including headers:
 - GenomicLocus : a unique identifier of a locus
 - chr : the chromosome of the locus
