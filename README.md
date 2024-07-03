@@ -5,7 +5,7 @@ If you have any problem using/installing FLAMES please open an issue.
 
 # Installation
 1. Download the FLAMES from this GitHub
-2. Download the required annotation data from [Zenodo](https://zenodo.org/records/12566840) 
+2. Download the required annotation data from [Zenodo](https://zenodo.org/records/12635505) 
 3. Create virtual enviroment  with required packages (recommended) or install needed packages.
 You can do this either by using conda by running:  
        1: ```conda env create --file environment.yml```  
