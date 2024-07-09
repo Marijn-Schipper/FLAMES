@@ -7,7 +7,7 @@ If you have any problem using/installing FLAMES please open an issue.
 
 # Installation
 1. Download the FLAMES from this GitHub
-2. Download the required annotation data from [Zenodo](https://zenodo.org/records/10417198) 
+2. Download the required annotation data from [Zenodo](https://zenodo.org/records/12635505) 
 3. Create virtual enviroment  with required packages (recommended) or install needed packages.
 You can do this either by using conda by running:  
        1: ```conda env create --file environment.yml```  
@@ -78,7 +78,7 @@ The command uses the previously generated MAGMA gene Z-scores and GTEx expressio
 ```
 
 ### 3. Run PoPS on the generated MAGMA z-scores. 
-The features used in the FLAMES manuscript can be downloaded from [Zenodo](https://zenodo.org/records/10409723). You can find the github for PoPS [here](https://github.com/FinucaneLab/pops).
+The features used in the FLAMES manuscript, or features compatible with FUMA output can be downloaded here: [Zenodo](https://zenodo.org/records/12635505). You can find the github for PoPS [here](https://github.com/FinucaneLab/pops).
 ```
 python pops.py \
 --gene_annot_path {PATH_TO_DOWNLOADED_FEATURES}\pops_features_pathway_naive/gene_annot.txt \
@@ -111,6 +111,13 @@ The INDEXFILE should contain the following column including the header:
 
 To predefine the output names of all the generated credible sets, also create the column Annotfiles.
 - Annotfiles : path and outputname for credible set. (e.g. /home/annotated_loci/annotated_locus_1.txt)
+
+An example of an indexfile is given here:
+```
+Filename       Annotfiles
+locus_1.txt       FLAMES_annotated_locus_1.txt
+locus_134.txt       FLAMES_annotated_locus_134.txt 
+```
 
 To run with predefined locus definitions add the -l flag with a the GENOMIC_LOCI_FILE. This file should contain the folowing tab separated columns including headers:
 - GenomicLocus : a unique identifier of a locus
