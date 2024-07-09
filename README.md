@@ -69,7 +69,7 @@ in general your command to run MAGMA will look like:
 ```
    
 ### 2. Run MAGMA tissue type analysis using your MAGMA Z-scores on the preformatted GTEx tissue expression file. 
-The command uses the previously generated MAGMA gene Z-scores and GTEx expression file which can be found on [Zenodo](https://zenodo.org/records/10409723)
+The command uses the previously generated MAGMA gene Z-scores and GTEx expression file which can be found on [Zenodo](https://zenodo.org/records/12635505)
 ```
 ./magma \
 --gene-results {DESIRED_ZSCORE_FILENAME}.genes.raw \
