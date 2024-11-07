@@ -1,5 +1,4 @@
 from annotate import main as annotate
-from train_FLAMES import main as train
 from optimize_FLAMES import main as optimize
 from FLAMES_scoring import main as FLAMES_scoring
 import os
@@ -146,46 +145,6 @@ def functional_annotation(args):
     )
     return
 
-
-def train_xgb(args):
-    parser = argparse.ArgumentParser(
-        description="Train XGB model from annotated finemapped loci"
-    )
-    parser.add_argument(
-        "-i",
-        "--input_files",
-        help="File containing the paths of all the inputfiles",
-        required=True,
-    )
-    parser.add_argument(
-        "-o", "--outdir", help="Output directory for the trained model", required=False
-    )
-    parser.add_argument(
-        "-d",
-        "--distance",
-        help="Maximum inclusion distance of genes, default is 750kb, can be set to include all when set to 0",
-        required=False,
-        default=750000,
-    )
-    parser.add_argument(
-        "-f",
-        "--features",
-        help="features used for training, default is all. RAW will only use raw features, rel will only use locus scaled features",
-        required=False,
-        default="all",
-    )
-    parser.add_argument(
-        "-s",
-        "--seed",
-        help="random seed to use, default is 42, random will randomize the seed",
-        required=False,
-        default=42,
-    )
-    args = parser.parse_args(args)
-    train(args.outdir, args.input_files, args.features, args.distance, args.seed)
-    return
-
-
 def optimize_FLAMES(args):
     parser = argparse.ArgumentParser(
         description="optimize XGB with PoPS from annotated finemapped loci"
@@ -288,20 +247,16 @@ def run_MAGMA_tisue_type(args):
 def main():
     splash_screen()
     if len(sys.argv) < 2:
-        raise Exception("State FLAMES function like so: python FLAMES.py annotate/train/FLAMES/optimize [args...]")
+        raise Exception("State FLAMES function like so: python FLAMES.py annotate/FLAMES [args...]")
     command = sys.argv[1]
     args = sys.argv[2:]
     if command == "annotate":
         functional_annotation(args)
-    elif command == "train":
-        train_xgb(args)
-    elif command == "optimize":
-        optimize_FLAMES(args)
     elif command == "FLAMES":
         FLAMES(args)
     else:
         raise Exception(
-            "Command not recognized. Please use annotate, train, optimize or FLAMES as your first argument."
+            "Command not recognized. Please use annotate or FLAMES as your first argument."
         )
     return sys.exit(0)
 

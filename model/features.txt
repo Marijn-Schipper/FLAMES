@@ -1,14 +1,4 @@
-genes_in_locus
-credset_size
-genes_within_50kb
-genes_within_100kb
-genes_within_250kb
-Highest_PIP
 rel_MAGMA_Z
-weighted_distance
-rel_weighted_distance
-TSS_distance
-rel_TSS_distance
 VEP_max
 rel_VEP_max
 CADD_sum
@@ -45,3 +35,7 @@ CLPP_eQTLgen_sum
 rel_CLPP_eQTLgen_sum
 cicero_sum
 rel_cicero_sum
+MAGMA_Z
+rel_weighted_distance
+rel_weighted_TSS_distance
+weighted_distance

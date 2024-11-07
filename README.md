@@ -1,6 +1,8 @@
-FLAMES version 1.0.0.
+FLAMES version 1.1.1.
+Please note that the version found in the FLAMES preprint can be found under release 1.0.0
+
 Thank you for your interest in using FLAMES for GWAS gene prioritization.
-The Python version of FLAMES is still being optimized. 
+The python version of FLAMES is still being optimized. 
 If you have any problem using/installing FLAMES please open an issue.
 
 # Installation
@@ -67,7 +69,7 @@ in general your command to run MAGMA will look like:
 ```
    
 ### 2. Run MAGMA tissue type analysis using your MAGMA Z-scores on the preformatted GTEx tissue expression file. 
-The command uses the previously generated MAGMA gene Z-scores and GTEx expression file which can be found on [Zenodo](https://zenodo.org/records/10409723)
+The command uses the previously generated MAGMA gene Z-scores and GTEx expression file which can be found on [Zenodo](https://zenodo.org/records/12635505)
 ```
 ./magma \
 --gene-results {DESIRED_ZSCORE_FILENAME}.genes.raw \
@@ -76,7 +78,8 @@ The command uses the previously generated MAGMA gene Z-scores and GTEx expressio
 ```
 
 ### 3. Run PoPS on the generated MAGMA z-scores. 
-The features used in the FLAMES manuscript, or features compatible with FUMA MAGMA Z-scores, can be downloaded from [Zenodo](https://zenodo.org/records/10409723). You can find the github for PoPS [here](https://github.com/FinucaneLab/pops). 
+The features used in the FLAMES manuscript, or features compatible with FUMA output can be downloaded here: [Zenodo](https://zenodo.org/records/12635505). You can find the github for PoPS [here](https://github.com/FinucaneLab/pops). PLEASE NOTE: When using the full features, --num_feature_chunks should be set to 116
+
 ```
 python pops.py \
 --gene_annot_path {PATH_TO_DOWNLOADED_FEATURES}\pops_features_pathway_naive/gene_annot.txt \
@@ -139,10 +142,30 @@ python FLAMES.py FLAMES \
 -o {DESIRED_OUTPUT_DIRECTORY}
 ```
 
+### FLAMES output format
+FLAMES generates three output files. \
+FLAMES.py annotate generates one output file per credible set: 
+- FLAMES_annotated_{locusname} is tab delimited file containing all the gene-level annotations as annotated from the provided credible sets. 
 
+FLAMES.py FLAMES generates two output files: 
+- FLAMES.preds is a tab-delimited file containing the scored annotation filename, the predicted gene, the raw and scaled FLAMES scores,  and the estimated precision of the prediction. \
+       - FLAMES.preds only contain genes above the cumulative 75% precision threshold as previously calibrated in the FLAMES paper. 
+- FLAMES_scores.raw contains the raw XGB and PoPS scores, scaled PoPS scores, the raw and scaled FLAMES scores, and the estimated precision of prediction if applicable. \
+       - Scaled PoPS scores are scaled from 0.292 to 1 (see paper) \
+       - Scaled FLAMES scores is calculated as the raw FLAMES score of a gene divided by the sum of raw FLAMES scores of all genes in the locus
+       
+
+### Note on running FLAMES faster. 
 Running FLAMES annotate faster:
-Default FLAMES will query the VEP API for the variants within your credible sets for the VEP features of interest.
+Default FLAMES will query the VEP & CADD API for the variants within your credible sets for the VEP features of interest.
 This is the biggest bottleneck for annotation speed. You can significantly speed up this process by running a command line version of VEP.
-Please use the --cmd-vep and --vep-cache and --vep_docker flags to use the cmd line version of VEP for FLAMES.
+Please use the --cmd-vep and --vep-cache to use the cmd line version of VEP for FLAMES. \
+--cmd-vep should be the command to run the vep application \
+--vep-cache should point to the local vep cahche
+
+CADD scores can by extracted locally by downloading tabixed CADD scores.\
+-t should point to your tabix installation \
+-cf should point to a tabixed CADD file
+
 
 
