@@ -1,4 +1,4 @@
-FLAMES version 1.1.1. (version published in https://www.nature.com/articles/s41588-025-02084-7).
+FLAMES version 1.1.1. (version published in https://www.nature.com/articles/s41588-025-02084-7).\
 Please note that the version found in the FLAMES preprint can be found under release 1.0.0
 
 Thank you for your interest in using FLAMES for GWAS gene prioritization.
