@@ -1,4 +1,4 @@
-FLAMES version 1.1.1.
+FLAMES version 1.1.1. (version published in https://www.nature.com/articles/s41588-025-02084-7).
 Please note that the version found in the FLAMES preprint can be found under release 1.0.0
 
 Thank you for your interest in using FLAMES for GWAS gene prioritization.
@@ -78,15 +78,17 @@ The command uses the previously generated MAGMA gene Z-scores and GTEx expressio
 ```
 
 ### 3. Run PoPS on the generated MAGMA z-scores. 
-The features used in the FLAMES manuscript, or features compatible with FUMA output can be downloaded here: [Zenodo](https://zenodo.org/records/12635505). You can find the github for PoPS [here](https://github.com/FinucaneLab/pops). PLEASE NOTE: When using the full features, --num_feature_chunks should be set to 116
+The features used in the FLAMES manuscript, or features compatible with FUMA output can be downloaded here: [Zenodo](https://zenodo.org/records/12635505). You can find the github for PoPS [here](https://github.com/FinucaneLab/pops). PLEASE NOTE: When using the pathway naive features, --num_feature_chunks should be set to 99.
+Our pre-generated PoPS features are created to match specific gene annotation files. Included every PoPS feature directory is a gene_annot text file which can be used to generate MAGMA gene annotations with. 
+The FUMA compatible features match all protein coding genes from ENSEMBL v102, and can be used with MAGMA output generated from FUMA. 
 
 ```
 python pops.py \
---gene_annot_path {PATH_TO_DOWNLOADED_FEATURES}\pops_features_pathway_naive/gene_annot.txt \
+--gene_annot_path {PATH_TO_DOWNLOADED_FEATURES}\pops_features_full/gene_annot.txt \
 --feature_mat_prefix {PATH_TO_DOWNLOADED_FEATURES}\pops_features_pathway_naive/munged_features/pops_features \
---num_feature_chunks 99 \
+--num_feature_chunks 116 \
 --magma_prefix {PATH_TO_GENERATED_MAGMA_Z_SCORES}\{DESIRED_ZSCORE_FILENAME} \
---control_features {PATH_TO_DOWNLOADED_FEATURES}\pops_features_pathway_naive/control.features \
+--control_features {PATH_TO_DOWNLOADED_FEATURES}\pops_features_full/control.features \
 --out_prefix {DESIRED_POPS_OUTPUT_PREFIX)
 ```
    
