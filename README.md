@@ -85,7 +85,7 @@ The FUMA compatible features match all protein coding genes from ENSEMBL v102, a
 ```
 python pops.py \
 --gene_annot_path {PATH_TO_DOWNLOADED_FEATURES}\pops_features_full/gene_annot.txt \
---feature_mat_prefix {PATH_TO_DOWNLOADED_FEATURES}\pops_features_pathway_naive/munged_features/pops_features \
+--feature_mat_prefix {PATH_TO_DOWNLOADED_FEATURES}\pops_features_full/munged_features/pops_features \
 --num_feature_chunks 116 \
 --magma_prefix {PATH_TO_GENERATED_MAGMA_Z_SCORES}\{DESIRED_ZSCORE_FILENAME} \
 --control_features {PATH_TO_DOWNLOADED_FEATURES}\pops_features_full/control.features \
