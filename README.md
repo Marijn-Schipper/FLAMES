@@ -145,17 +145,22 @@ python FLAMES.py FLAMES \
 ```
 
 ### FLAMES output format
-FLAMES generates three output files. \
+FLAMES generates three types of output files. \
 FLAMES.py annotate generates one output file per credible set: 
 - FLAMES_annotated_{locusname} is tab delimited file containing all the gene-level annotations as annotated from the provided credible sets. 
 
 FLAMES.py FLAMES generates two output files: 
-- FLAMES.preds is a tab-delimited file containing the scored annotation filename, the predicted gene, the raw and scaled FLAMES scores,  and the estimated precision of the prediction. \
+- FLAMES_scores.preds is a tab-delimited file containing the scored annotation filename, the predicted gene, the raw and scaled FLAMES scores,  and the estimated precision of the prediction. \
        - FLAMES.preds only contain genes above the cumulative 75% precision threshold as previously calibrated in the FLAMES paper. 
 - FLAMES_scores.raw contains the raw XGB and PoPS scores, scaled PoPS scores, the raw and scaled FLAMES scores, and the estimated precision of prediction if applicable. \
        - Scaled PoPS scores are scaled from 0.292 to 1 (see paper) \
        - Scaled FLAMES scores is calculated as the raw FLAMES score of a gene divided by the sum of raw FLAMES scores of all genes in the locus
-       
+
+### Interpreting cumulative precision  
+FLAMES outputs are calibrated on an ExWAS-implicated benchmarking set as highlighted in the FLAMES paper.\
+Cumulative precision thresholds represent the average precision with which we prioritize genes in our calibration set at that threshold. \
+The outputted scores in the .preds files are ranked. \
+An estimated cumulative precision of 0.8 would indicate that prioritizing genes at or above the threshold of that locus, the set on average would be 80% precise.
 
 ### Note on running FLAMES faster. 
 Running FLAMES annotate faster:
