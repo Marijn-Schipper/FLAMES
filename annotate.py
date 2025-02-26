@@ -946,6 +946,9 @@ def annotate_credset(
         if not check_dist_to_causal(genes, dist=750000):
             exit("The true positive causal gene is too far from lead SNP for {fname}")
     genes = genes[genes["distance"] <= 750000]
+    if len(genes) == 0:
+        print(f"\nNo genes after filtering SNPs on distance, exiting\n")
+        return genes
     start_time = time.time()
     if cmd_vep == False:
         genes = get_VEP(creds, genes, prob_col, build)
@@ -1155,6 +1158,9 @@ def full_annotation_of_credset(
     ref_genes = os.path.join(Ann_path, "ENSG/ENSG.v102.genes.txt")
     if os.path.exists(genes):
         genes = get_genes_in_locus(locno, ref_genes, genes)
+        if len(genes) == 0:
+            print(f"\nNo genes in locus {locno}")
+            return
     else:
         genes = Genes_in_locus_bp_based(locno, GenomicRiskLoci, ref_genes, lo)
     if len(genes) == 0:
