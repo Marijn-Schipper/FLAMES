@@ -55,6 +55,12 @@ python {PATH_TO_FLAMES_FOLDER}/FLAMES.py FLAMES -id indexfile.txt -o ./
 This will score the generated annotated loci and produce the results reported for twinning in the FLAMES paper.
 
 ## Running FLAMES on your data from scratch
+
+### Genome build info
+Since most reference data used in FLAMES was mapped to hg19, this is the build FLAMES accepts by default. 
+You can either lift over your GWAS, or make sure your MAGMA-Z scores provided are created for the right genome build, and add the -b GRCh38 flag to FLAMES annotate.
+FLAMES annotate uses pyliftover for lifting over your provided variants to GRCh19 internally to create gene level annotations.
+
 Step 1 and 2 can be performed by uploading your summary statistics to FUMA and running MAGMA there, and downloading the final results.
 ### 1. Run MAGMA on your summary statistics to obtain gene-level Z-scores. 
 You can find information on how to do this on the [MAGMA website](https://ctg.cncr.nl/software/magma).
