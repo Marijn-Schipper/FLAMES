@@ -22,13 +22,13 @@ def functional_annotation(args):
     parser.add_argument(
         "-l",
         "--GenomicRiskLoci",
-        help="Path to the file that describes the boundaries of the locus that belongs to each inputted credible set",
+        help="Path to the file that describes the boundaries of the locus that belongs to each inputted credible set. To score all genes in locus regardless of distance, also change -f flag (NOT RECOMMENDED).",
         required=False,
     )
     parser.add_argument(
         "-g",
         "--genes",
-        help="Path to the file that describes the genes that belong to each locus",
+        help="Path to the file that describes the genes that belong to each locus. Needs to contain 'ensg' column and 'GenomicLocus' column, where the latter should match the locus in indexfile",
         required=False,
         default="BP mapping",
     )
@@ -55,9 +55,6 @@ def functional_annotation(args):
         required=True,
     )
     parser.add_argument(
-        "-proc", "--processes", help="Number of processes to use", default=False
-    )
-    parser.add_argument(
         "-tp",
         "--true_positives",
         help="Path to the file that describes the true positive genes in each locus",
@@ -71,18 +68,15 @@ def functional_annotation(args):
     parser.add_argument(
         "-f",
         "--filter",
-        help="Filter the credible sets to only include those with a posterior probability of 0.95 or greater",
-        action="store_true",
+        help="Drop all variants with distance > filter. Default is 750kb. WARNING: FLAMES is trained on 750kb, so precision estimate might be inacurate if increased",
         default=750000,
+        type=int,
     )
     parser.add_argument(
         "-cv", "--cmd_vep", help="path to the vep executable", default=False
     )
     parser.add_argument(
         "-vc", "--vep_cache", help="path to the vep cache", default=False
-    )
-    parser.add_argument(
-        "-vd", "--vep_docker", help="path to the vep docker", default=False
     )
     parser.add_argument(
         "-sc",
@@ -138,7 +132,6 @@ def functional_annotation(args):
         args.filter,
         args.cmd_vep,
         args.vep_cache,
-        args.vep_docker,
         args.tabix,
         args.CADD_file,
         args.credset_95,
