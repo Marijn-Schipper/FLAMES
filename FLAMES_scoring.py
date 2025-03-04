@@ -133,7 +133,7 @@ def main(model_dir, input, pops_combi, filt, outdir, name="FLAMES_scores"):
 
         ]
     ]
-    df['estimated_cumulative_precision'] = df['estimated_cumulative_precision'] * df['FLAMES_causal']
+    df['estimated_cumulative_precision'] = df['estimated_cumulative_precision'] * df['FLAMES_highest']
     df.to_csv(f"{outdir}/{name}.raw", sep="\t", index=False)
     df=df[df['FLAMES_causal'] == 1]
     df = df.sort_values("FLAMES_scaled", ascending=False)
