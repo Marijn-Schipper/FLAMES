@@ -467,7 +467,6 @@ def get_Promoters(prom_dir, genes, creds, prob_col, build):
 
 # Get the GTEx eQTLs in a locus
 def get_VEP(creds, genes, prob_col, build):
-    scores = {}
     VEP_dict = {"HIGH": 1, "MODERATE": 0.6, "LOW": 0.4, "MODIFIER": 0.1}
     VEPs = creds.apply(
         lambda row: Query_api.query_VEP(
@@ -507,21 +506,19 @@ def get_VEP(creds, genes, prob_col, build):
 
 # run vep in environment
 def run_vep_within_environment(
-    input_file, output_file, vep_path, vep_cache, build, environment_path
+    input_file, output_file, vep_path, vep_cache, build,
 ):
     if build.upper() == "GRCH38" or build.upper() == "HG38":
         build = "GRCh38"
     else:
         build = "GRCh37"
-
-    environment_command = f"{environment_path} "
-    vep_command = f" {vep_path} -i {input_file} -o {output_file} --cache {vep_cache} --assembly {build} --offline --force_overwrite"
-    subprocess.run(environment_command + vep_command, shell=True, check=True)
+    vep_command = f"{vep_path} -i {input_file} -o {output_file} --cache {vep_cache} --assembly {build} --offline --force_overwrite"
+    subprocess.run(vep_command, shell=True, check=True)
     return
 
 
 def cmd_VEP(
-    creds, genes, prob_col, build, VEP_path, VEP_cache, environment_path, outdir
+    creds, genes, prob_col, build, VEP_path, VEP_cache, outdir
 ):
     tmpname = tempfile.mktemp()
     tmp_file_path = os.path.join(f"{tmpname}.vcf")
@@ -530,7 +527,7 @@ def cmd_VEP(
         os.makedirs(outdir)
     output_lines = creds.copy()
     output_lines = output_lines.sort_values(["chr", "pos"])
-    output_lines[['a1', 'a2']] = output_lines[['a1', 'a2']].apply(lambda x: sorted(x), axis=1, result_type='expand')
+    output_lines[['a1', 'a2']] = output_lines[['a1', 'a2']]
 
 
     output_lines = output_lines.apply(
@@ -548,14 +545,14 @@ def cmd_VEP(
         file.write("\n".join(output_lines))
 
     run_vep_within_environment(
-        tmp_file_path, output_file_path, VEP_path, VEP_cache, build, environment_path
+        tmp_file_path, output_file_path, VEP_path, VEP_cache, build,
     )
     data = []
     with open(output_file_path, "r") as file:
         for line in file:
             if not line.startswith("##"):
                 data.append(line.strip().split("\t"))
-
+    
     vep_df = pd.DataFrame(data[1:], columns=data[0])
     vep_df["Extra"] = vep_df["Extra"].str.extract(r"IMPACT=(\w+);")
     vep_df["Extra"] = vep_df["Extra"].fillna("None")
@@ -931,7 +928,6 @@ def annotate_credset(
     Ann_path,
     cmd_vep,
     vep_cache,
-    vep_docker,
     tabix,
     CADD_file,
     outdir,
@@ -939,13 +935,13 @@ def annotate_credset(
     fname,
     magma=False,
     trainset=False,
-    filter=False,
+    filter=750000,
 ):
     genes = get_TSS_distances(creds, genes, prob_col, build)
     if trainset:
         if not check_dist_to_causal(genes, dist=750000):
             exit("The true positive causal gene is too far from lead SNP for {fname}")
-    genes = genes[genes["distance"] <= 750000]
+    genes = genes[genes["weighted_distance"] <= filter]
     if len(genes) == 0:
         print(f"\nNo genes after filtering SNPs on distance, exiting\n")
         return genes
@@ -957,7 +953,7 @@ def annotate_credset(
             return genes
     else:
         genes = cmd_VEP(
-            creds, genes, prob_col, build, cmd_vep, vep_cache, vep_docker, outdir
+            creds, genes, prob_col, build, cmd_vep, vep_cache, outdir
         )
         if len(genes) == 0:
             print("\nError in querying VEP, this could be due to the VEP API server. Please try again later or contact our GitHub, exiting\n")
@@ -1072,18 +1068,20 @@ def check_risk_loci(GenomicRiskLoci, creds, locno, filter):
         GenomicRiskLoci = pd.DataFrame()
         GenomicRiskLoci["GenomicLocus"] = [locno]
         GenomicRiskLoci["chr"] = min(creds["chr"])
-        if filter == False:
-            annot_range = 750000
-        else:
-            annot_range = filter
-        GenomicRiskLoci["start"] = max([0, min(creds["pos"]) - annot_range])
-        GenomicRiskLoci["end"] = max(creds["pos"]) + annot_range
+        GenomicRiskLoci["start"] = max([0, min(creds["pos"]) - filter])
+        GenomicRiskLoci["end"] = max(creds["pos"]) + filter
     return GenomicRiskLoci
 
 
 # generate 95% credible set
 def create_95perc_credset(creds, prob_col):
     sorted_data = creds.sort_values(prob_col)
+    if sum(sorted_data[prob_col]) < 0.95:
+        print("\nWARNING: The sum of the probabilities is less than 0.95")
+        return(creds)
+    if sum(sorted_data[prob_col]) > 1.0:
+        print("\nWARNING: The sum of the probabilities is greater than 1.0, rescaling")
+        sorted_data[prob_col] = sorted_data[prob_col] / sum(sorted_data[prob_col])
     sorted_data["cumulative_sum"] = sorted_data[prob_col].cumsum()
     creds = sorted_data[sorted_data["cumulative_sum"] >= 0.05]
     creds.reset_index(drop=True, inplace=True)
@@ -1120,7 +1118,6 @@ def full_annotation_of_credset(
     filter=False,
     cmd_vep=False,
     vep_cache=False,
-    vep_docker=False,
     tabix=False,
     CADD_file=False,
     c95=True
@@ -1179,7 +1176,6 @@ def full_annotation_of_credset(
         Ann_path,
         cmd_vep,
         vep_cache,
-        vep_docker,
         tabix,
         CADD_file,
         outdir,
@@ -1251,10 +1247,9 @@ def main(
     loci=False,
     genes=False,
     TP=False,
-    filter=False,
+    filter=750000,
     cmd_vep=False,
     vep_cache=False,
-    vep_docker=False,
     tabix=False,
     CADD_file=False,
     c95=True
@@ -1319,7 +1314,6 @@ def main(
                     filter,
                     cmd_vep,
                     vep_cache,
-                    vep_docker,
                     tabix,
                     CADD_file,
                     c95
@@ -1355,7 +1349,6 @@ def main(
                 filter,
                 cmd_vep,
                 vep_cache,
-                vep_docker,
                 tabix,
                 CADD_file,
                 c95,
