@@ -46,7 +46,7 @@ def create_XY_train(df, filter=None, inclusion="all"):
         "cicero_sum",
     ]
     if filter != None:
-        df = df[df["distance"] <= int(filter)]
+        df = df[df["weighted_distance"] <= int(filter)]
     else:
         df = df[df["weighted_distance"] <= 750000]
         df = df.groupby("filename").apply(adjust_PoPS_scores)
