@@ -100,7 +100,7 @@ python pops.py \
    
 ### 4. Format your credible sets. 
 The required format is two tab separated columns. 
-The first column should contain the SNPs in the credible set in the format CHR:BP:A1:A2 (e.g. 2:2345123:A:T).
+The first column should contain the SNPs in the credible set in the format CHR:BP:A1:A2 (e.g. 2:2345123:A:T) or in the format CHR:BP:A1_A2 (e.g. 2:2345123:A_T).
 The second column should contain the fine-mapping PIP for each SNP.
 
 ### 5. Run FLAMES annotate on the credible set. 
@@ -141,7 +141,7 @@ The GenomicLocus columns should now also be added to the INDEXFILE so that the c
    
 ### 6. Run FLAMES scoring on the previously generated annotation file. 
 For running FLAMES scoring you should run FLAMES.py FLAMES with the following options:
--id or -i where :id points to a tab delimited txt file containing the column Annotfiles with the output from FLAMES annotate that you want to score. i will point to a txt file containing all the desired input files. Each file should be on their own line.
+-id or -i where :id points to a tab delimited txt file containing the column Annotfiles with the output from FLAMES annotate that you want to score. -i will point to a txt file containing all the desired input files. Each file should be on their own line.
 -o: the desired output directory or filename.
 The command will look something like:
 ```
