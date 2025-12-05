@@ -18,11 +18,11 @@ Or by running:
    We highly recommend installing miniconda and creating an environment within conda as this provides a stable environment for FLAMES to run.  
    
 
-This is everything you need to run the tutorial
-If you want to run FLAMES on your own GWAS results you will also need the following:
-MAGMA
-PoPS
-Finemapping results from statistical fine-mapping software e.g. FINEMAP or SusieR
+This is everything you need to run the tutorial. \
+If you want to run FLAMES on your own GWAS results you will also need the following: \
+- MAGMA output \
+- PoPS output \
+- Finemapping results from statistical fine-mapping software e.g. FINEMAP or SusieR \
 
 # Running FLAMES
 ## Running FLAMES on example data:
