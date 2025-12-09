@@ -532,8 +532,8 @@ def cmd_VEP(
 
     output_lines = output_lines.apply(
         lambda row: [
-            f"{row['chr']} {row['pos']} {row['pos']} {row['a1']}/{row['a2']} +",
-            f"{row['chr']} {row['pos']} {row['pos']} {row['a1']}/{row['a2']} -",
+            f"{row['chr']} {row['pos']} {row['pos'] + len(row['a1']) - 1} {row['a1']}/{row['a2']} +",
+            f"{row['chr']} {row['pos']} {row['pos'] + len(row['a1']) - 1} {row['a1']}/{row['a2']} -",
         ],
         axis=1,
     )
