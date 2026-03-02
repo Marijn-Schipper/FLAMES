@@ -76,6 +76,11 @@
 tar -xzvf Annotation_data.tar.gz
 tar -xzvf pops_features_full_FUMA_compatible.tar.gz
 ```
+- Unpacking `Annotation_data.tar.gz` might take a while. The folder `Annotation_data` should be around 315G so make sure to reserve enough space for it. 
+- After unpacking the folder `pops_features_full_FUMA_compatible` should be around 9G
+
+
+
 
 8. (optional) CADD and VEP
 - FLAMES annotation step queries the API for CADD score and VEP. The query can be timed-out if there are too many requests. If preferred, you can utilize the cached functionality that is built in to FLAMES. To use this, you need to download the following: 
