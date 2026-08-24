@@ -9,7 +9,7 @@ import pandas as pd
 def splash_screen():
     print('\n*********************************************************************')
     print('*Fine-mapped Locus Assesment Model of Effector geneS (FLAMES)')
-    print('* Version 1.1.2')
+    print('* Version 1.1.3')
     print('* (C) 2023 Marijn Schipper')
     print('*********************************************************************')
     print()
