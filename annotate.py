@@ -1141,7 +1141,7 @@ def full_annotation_of_credset(
     if os.path.exists(outfile):
         print(f"\nAnnotation file {outfile} already exists")
         return
-    creds = pd.read_csv(path_to_credset, delim_whitespace=True, comment="#").dropna()
+    creds = pd.read_csv(path_to_credset, sep=r'\s+', comment="#").dropna()
     if c95 == True:
         creds = create_95perc_credset(creds, prob_col)
     creds[["chr", "pos", "a1", "a2"]] = creds[SNP_col].str.split(r"[:_]", expand=True)
@@ -1259,10 +1259,10 @@ def main(
 
     # Load PoPS & MAGMA scores
     PoPS = pd.read_csv(pops_out, sep="\t", engine="pyarrow")
-    magma_z = pd.read_csv(magma_z, delim_whitespace=True)
+    magma_z = pd.read_csv(magma_z, sep=r'\s+')
     magma_tissues = pd.read_csv(
         magma_tissue,
-        delim_whitespace=True,
+        sep=r'\s+',
         comment="#",
     )
     magma_scores = create_relevance_dict(magma_tissues)
