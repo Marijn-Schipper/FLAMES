@@ -500,7 +500,8 @@ def get_VEP(creds, genes, prob_col, build):
     vep_df["VEP_sum"] = vep_df.groupby("ensg")["consequence"].transform("sum")
     vep_df = vep_df[["ensg", "VEP_sum", "VEP_max"]]
     genes = genes.merge(vep_df, on="ensg", how="left")
-    genes.fillna(0, inplace=True)
+    num_cols = genes.select_dtypes("number").columns
+    genes[num_cols] = genes[num_cols].fillna(0)
     return genes
 
 
@@ -573,7 +574,8 @@ def cmd_VEP(
     vep_df = vep_df[["Gene", "VEP_sum", "VEP_max"]]
     genes = genes.merge(vep_df, left_on="ensg", right_on="Gene", how="left")
     genes.drop(columns=["Gene"], inplace=True)
-    genes.fillna(0, inplace=True)
+    num_cols = genes.select_dtypes("number").columns
+    genes[num_cols] = genes[num_cols].fillna(0)
     for f in [
         tmp_file_path,
         output_file_path,

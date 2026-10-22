@@ -51,12 +51,12 @@ def create_XY_train(df, filter=None, inclusion="all"):
         df = df[df["distance"] <= int(filter)]
     else:
         df = df[df["weighted_distance"] <= 750000]
-        df = df.groupby("filename").apply(adjust_PoPS_scores)
+        df = df.groupby(df["filename"].rename(None), group_keys=False).apply(adjust_PoPS_scores)
     if "gene_biotype" in df.columns:
         df = df[df["gene_biotype"] == "protein_coding"]
     if "type" in df.columns:
         df = df[df["type"] == "protein_coding"]
-    df = df.groupby("filename").apply(ann.create_relative_annotation)
+    df = df.groupby(df["filename"].rename(None), group_keys=False).apply(ann.create_relative_annotation)
 
 def Flames_scoring(df, pops_combi):
     df = df.drop_duplicates(keep="first")
@@ -108,7 +108,7 @@ def optimize_params(
     fscores = {}
     for i in range(iterations):
         PoPS_combination = np.linspace(0, 1, iterations)[i]
-        df = results.groupby("locus").apply(
+        df = results.groupby(results["locus"].rename(None), group_keys=False).apply(
             Flames_scoring,
             PoPS_combination,
         )
