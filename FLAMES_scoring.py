@@ -49,12 +49,12 @@ def create_XY_train(df, filter=None, inclusion="all"):
         df = df[df["weighted_distance"] <= int(filter)]
     else:
         df = df[df["weighted_distance"] <= 750000]
-        df = df.groupby("filename").apply(adjust_PoPS_scores)
+        df = df.groupby(df["filename"].rename(None), group_keys=False).apply(adjust_PoPS_scores)
     if "gene_biotype" in df.columns:
         df = df[df["gene_biotype"] == "protein_coding"]
     if "type" in df.columns:
         df = df[df["type"] == "protein_coding"]
-    df = df.groupby("filename").apply(ann.create_relative_annotation)
+    df = df.groupby(df["filename"].rename(None), group_keys=False).apply(ann.create_relative_annotation)
 
     for feature in best_predictors:
         if inclusion.lower() == "all":
@@ -114,7 +114,7 @@ def main(model_dir, input, pops_combi, filt, outdir, name="FLAMES_scores"):
         X_val[feature] = X_val[feature].astype(float)
     y_pred = FLAMES.predict_proba(X_val)[:, 1]
     df["XGB_score"] = y_pred
-    df = df.groupby("locus").apply(optf.Flames_scoring, pops_combi)
+    df = df.groupby(df["locus"].rename(None), group_keys=False).apply(optf.Flames_scoring, pops_combi)
     df = df[
         [
             "locus",
